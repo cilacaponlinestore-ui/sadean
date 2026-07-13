@@ -25,9 +25,9 @@ Tidak perlu setup apa-apa. DB udah running.
    ```
    NODE_ENV=production
    DATABASE_URL=postgresql://postgres.iwklzxtakqedshykjckf:[PASSWORD]@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres?schema=sadean&sslmode=require
-   JWT_SECRET=a2b129f629906d5a04fc5d489215f8a7ae0a8ce95fc0cbd7049b55e21f2464f9
+   JWT_SECRET=<generate_random_64_char_hex>
    JWT_EXPIRATION=15m
-   JWT_REFRESH_SECRET=b0f8b8a886f42f09f7a47f31b1b49daa78b7b1b86914f7e67a14e490064c5672
+   JWT_REFRESH_SECRET=<generate_different_random_64_char_hex>
    JWT_REFRESH_EXPIRATION=30d
    SUPABASE_URL=https://iwklzxtakqedshykjckf.supabase.co
    SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml3a2x6eHRha3FlZHNoeWtqY2tmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5NTQ0NzMsImV4cCI6MjA5OTUzMDQ3M30.301TVSuXjswJ5KD9EFsSsWPaMUzqV1yPCQuKWj8IzLM
@@ -78,7 +78,7 @@ docker run -d --name sadean-api -p 3001:3001 \
 | Variable | Value |
 |---|---|
 | `DATABASE_URL` | `postgresql://postgres.iwklzxtakqedshykjckf:PASSWORD@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres?schema=sadean&sslmode=require` |
-| `JWT_SECRET` | `a2b129f629906d5a04fc5d489215f8a7ae0a8ce95fc0cbd7049b55e21f2464f9` |
+| `JWT_SECRET` | Generate a unique 64-character hexadecimal secret |
 | `SUPABASE_URL` | `https://iwklzxtakqedshykjckf.supabase.co` |
 | `SUPABASE_ANON_KEY` | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...` |
 | `CORS_ORIGIN` | URL Vercel setelah deploy |

@@ -1,5 +1,5 @@
 # Build stage
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
@@ -25,7 +25,7 @@ RUN npx prisma generate --schema=apps/api/prisma/schema.prisma
 RUN npm run build --workspace=apps/api
 
 # Production stage
-FROM node:20-alpine AS runner
+FROM node:22-alpine AS runner
 
 WORKDIR /app
 
@@ -41,4 +41,4 @@ USER nestjs
 
 EXPOSE 3001
 
-CMD ["node", "dist/main.js"]
+CMD ["node", "dist/src/main.js"]

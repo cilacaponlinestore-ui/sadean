@@ -9,12 +9,13 @@ import { supabase } from '@/lib/supabase';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, isLoading, error, clearError } = useAuthStore();
+  const { login, error, clearError } = useAuthStore();
   const [form, setForm] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
 
-  const submit = async (event: React.FormEvent) => { event.preventDefault(); clearError(); try { await login(form.email, form.password); toast.success('Selamat datang kembali'); router.push('/dashboard'); } catch {} };
+  const submit = async (event: React.FormEvent) => { event.preventDefault(); clearError(); setPasswordLoading(true); try { await login(form.email, form.password); toast.success('Selamat datang kembali'); router.push('/dashboard'); } catch {} finally { setPasswordLoading(false); } };
   const google = async () => {
     setGoogleLoading(true);
     const { error: oauthError } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: `${window.location.origin}/auth/callback` } });
@@ -39,7 +40,7 @@ export default function LoginPage() {
             {error && <div role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{error}</div>}
             <div><label htmlFor="email" className="text-sm font-bold text-gray-700">Email</label><input id="email" type="email" autoComplete="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="nama@email.com" className="focus-ring mt-2 h-12 w-full rounded-xl border border-black/10 bg-white px-4 outline-none" /></div>
             <div><label htmlFor="password" className="text-sm font-bold text-gray-700">Password</label><div className="relative mt-2"><input id="password" type={showPassword ? 'text' : 'password'} autoComplete="current-password" required value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="Masukkan password" className="focus-ring h-12 w-full rounded-xl border border-black/10 bg-white px-4 pr-16 outline-none"/><button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-primary-700">{showPassword ? 'Tutup' : 'Lihat'}</button></div></div>
-            <button disabled={isLoading} className="focus-ring h-12 w-full rounded-xl bg-primary-700 font-bold text-white hover:bg-primary-800 disabled:opacity-50">{isLoading ? 'Memproses...' : 'Masuk'}</button>
+            <button disabled={passwordLoading} className="focus-ring h-12 w-full rounded-xl bg-primary-700 font-bold text-white hover:bg-primary-800 disabled:opacity-50">{passwordLoading ? 'Memproses...' : 'Masuk'}</button>
           </form>
           <p className="mt-7 text-center text-sm text-gray-500">Belum punya akun? <Link href="/register" className="font-bold text-primary-700 hover:underline">Daftar sekarang</Link></p>
         </div>

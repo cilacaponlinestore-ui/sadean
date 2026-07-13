@@ -8,7 +8,7 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   const token = request.cookies.get('sadean_token')?.value
 
-  const isPublic = publicRoutes.some((route) => pathname.startsWith(route))
+  const isPublic = pathname === '/' || publicRoutes.some((route) => pathname.startsWith(route))
   const isAuthPage = authPages.some((route) => pathname === route)
   const isStatic = pathname.startsWith('/_next') || pathname.startsWith('/icons') || pathname.startsWith('/manifest') || pathname === '/sw.js' || pathname === '/favicon.ico' || pathname === '/offline'
 

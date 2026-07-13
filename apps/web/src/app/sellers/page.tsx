@@ -1,84 +1,19 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import api from '@/lib/api';
 import Navbar from '@/components/Navbar';
+import { SellerCard } from '@/components/MarketplaceCards';
 import toast from 'react-hot-toast';
 
-interface Seller {
-  id: string;
-  storeName: string;
-  slug: string;
-  description: string;
-  logo: string;
-  _count: { products: number };
-}
-
 export default function SellersPage() {
-  const [sellers, setSellers] = useState<Seller[]>([]);
+  const [sellers, setSellers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    loadSellers();
-  }, []);
-
-  const loadSellers = async () => {
-    try {
-      const response = await api.get('/sellers/public');
-      setSellers(response.data);
-    } catch (error) {
-      toast.error('Gagal memuat data penjual');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">UMKM Cilacap</h1>
-          <p className="text-gray-500">Temukan toko lokal terpercaya</p>
-        </div>
-
-        {loading ? (
-          <div className="text-center py-12">Memuat data...</div>
-        ) : sellers.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500">Belum ada toko terdaftar</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {sellers.map((seller) => (
-              <Link
-                key={seller.id}
-                href={`/sellers/${seller.slug}`}
-                className="bg-white rounded-lg shadow hover:shadow-md transition-shadow p-6"
-              >
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
-                    {seller.logo ? (
-                      <img src={seller.logo} alt={seller.storeName} className="w-full h-full object-cover rounded-lg" />
-                    ) : (
-                      <span className="text-2xl">🏪</span>
-                    )}
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900">{seller.storeName}</h3>
-                    <p className="text-sm text-gray-500">{seller._count?.products || 0} produk</p>
-                  </div>
-                </div>
-                <p className="text-gray-600 text-sm line-clamp-2">
-                  {seller.description || 'Tidak ada deskripsi'}
-                </p>
-              </Link>
-            ))}
-          </div>
-        )}
-      </main>
-    </div>
-  );
+  const [search, setSearch] = useState('');
+  useEffect(() => { api.get('/sellers/public').then((res) => setSellers(res.data)).catch(() => toast.error('Gagal memuat toko')).finally(() => setLoading(false)); }, []);
+  const filtered = sellers.filter((seller) => `${seller.storeName} ${seller.description || ''} ${seller.address || ''}`.toLowerCase().includes(search.toLowerCase()));
+  return <div className="min-h-screen bg-canvas"><Navbar /><main id="main-content" className="page-container py-10 sm:py-14">
+    <div className="grid gap-7 lg:grid-cols-[1fr_420px] lg:items-end"><div><p className="eyebrow">Kenal lebih dekat</p><h1 className="section-heading mt-3">UMKM pilihan Cilacap</h1><p className="mt-3 max-w-2xl leading-7 text-gray-500">Di balik setiap produk ada tetangga, keluarga, dan cerita usaha lokal yang layak tumbuh.</p></div><label className="surface relative block p-2"><span className="sr-only">Cari toko</span><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Cari nama toko atau lokasi..." className="focus-ring h-12 w-full rounded-xl bg-canvas px-4 outline-none" /></label></div>
+    <div className="mt-10">{loading ? <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{Array.from({ length: 6 }).map((_, i) => <div key={i} className="h-48 animate-pulse rounded-2xl bg-black/5" />)}</div> : filtered.length ? <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{filtered.map((seller) => <SellerCard key={seller.id} seller={seller} />)}</div> : <div className="surface py-16 text-center"><p className="text-xl font-black">Toko belum ditemukan</p><p className="mt-2 text-gray-500">Coba nama atau lokasi yang berbeda.</p></div>}</div>
+  </main></div>;
 }

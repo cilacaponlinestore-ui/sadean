@@ -6,11 +6,8 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
 
 const sellerLinks = [
-  { href: '/dashboard', label: 'Dashboard', icon: '📊' },
-  { href: '/seller/products', label: 'Produk', icon: '📦' },
-  { href: '/seller/orders', label: 'Pesanan', icon: '📋' },
-  { href: '/seller/store', label: 'Profil Toko', icon: '🏪' },
-  { href: '/profile', label: 'Profil Saya', icon: '👤' },
+  { href: '/dashboard', label: 'Ringkasan', icon: '⌂' }, { href: '/seller/products', label: 'Produk', icon: '□' },
+  { href: '/seller/orders', label: 'Pesanan', icon: '≡' }, { href: '/seller/store', label: 'Toko', icon: '◇' }, { href: '/profile', label: 'Akun', icon: '○' },
 ];
 
 export default function SellerLayout({
@@ -42,16 +39,14 @@ export default function SellerLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-canvas">
       {/* Top Navbar */}
-      <header className="bg-white shadow sticky top-0 z-50">
+      <header className="sticky top-0 z-50 border-b border-black/5 bg-canvas/90 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
-            <Link href="/" className="text-2xl font-bold text-primary-600">
-              SADEAN
-            </Link>
+            <Link href="/" className="flex items-center gap-2 font-black text-ink"><span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-700 text-white">S</span> SADEAN <span className="hidden rounded-full bg-primary-100 px-2 py-1 text-[10px] uppercase tracking-wider text-primary-800 sm:inline">Seller</span></Link>
             <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-700">{user.name}</span>
+              <span className="hidden text-sm font-bold text-gray-700 sm:block">{user.name}</span>
               <button
                 onClick={handleLogout}
                 className="px-4 py-2 text-sm text-red-600 hover:text-red-700"
@@ -65,7 +60,7 @@ export default function SellerLayout({
 
       <div className="flex">
         {/* Sidebar */}
-        <aside className="w-64 bg-white shadow min-h-[calc(100vh-64px)] hidden md:block">
+        <aside className="hidden min-h-[calc(100vh-72px)] w-64 border-r border-black/5 bg-white/70 md:block">
           <nav className="p-4">
             <ul className="space-y-1">
               {sellerLinks.map((link) => (
@@ -73,7 +68,7 @@ export default function SellerLayout({
                   <Link
                     href={link.href}
                     className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                      pathname === link.href
+                      pathname === link.href || (link.href !== '/dashboard' && pathname.startsWith(link.href))
                         ? 'bg-primary-50 text-primary-600'
                         : 'text-gray-600 hover:bg-gray-50'
                     }`}
@@ -88,8 +83,9 @@ export default function SellerLayout({
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-6">{children}</main>
+        <main className="min-w-0 flex-1 p-4 pb-24 sm:p-6 md:pb-6">{children}</main>
       </div>
+      <nav className="fixed inset-x-0 bottom-0 z-50 grid grid-cols-5 border-t border-black/10 bg-white/95 px-1 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden" aria-label="Navigasi seller">{sellerLinks.map((link) => <Link key={link.href} href={link.href} className={`flex min-h-16 flex-col items-center justify-center gap-1 text-[10px] font-bold ${pathname === link.href || (link.href !== '/dashboard' && pathname.startsWith(link.href)) ? 'text-primary-700' : 'text-gray-500'}`}><span className="text-lg leading-none">{link.icon}</span>{link.label}</Link>)}</nav>
     </div>
   );
 }

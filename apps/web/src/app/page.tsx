@@ -14,7 +14,7 @@ async function get(path: string, revalidate: number) {
 
 export default async function Home() {
   const [banners, productData, sellers] = await Promise.all([
-    get('/banners', 60), get('/products?limit=8', 60), get('/sellers', 120),
+    get('/banners', 60), get('/products?limit=8', 60), get('/sellers/public', 120),
   ]);
   const products = productData?.products || [];
   const sellerList = Array.isArray(sellers) ? sellers.slice(0, 4) : [];

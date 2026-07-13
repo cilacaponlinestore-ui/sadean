@@ -18,6 +18,7 @@ interface AuthState {
   error: string | null;
   
   login: (email: string, password: string) => Promise<void>;
+  completeGoogleLogin: (accessToken: string) => Promise<void>;
   register: (data: {
     email: string;
     password: string;
@@ -44,12 +45,32 @@ export const useAuthStore = create<AuthState>((set) => ({
       
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
-      Cookies.set('sadean_token', accessToken, { expires: 7, secure: false });
+       Cookies.set('sadean_token', accessToken, { expires: 1 / 96, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/' });
       
       set({ user, isAuthenticated: true, isLoading: false });
     } catch (error: any) {
       const message = error.response?.data?.message || 'Login failed';
       set({ error: message, isLoading: false });
+      throw error;
+    }
+  },
+
+  completeGoogleLogin: async (googleAccessToken: string) => {
+    try {
+      set({ isLoading: true, error: null });
+      const response = await authApi.google(googleAccessToken);
+      const { user, accessToken, refreshToken } = response.data;
+      localStorage.setItem('accessToken', accessToken);
+      localStorage.setItem('refreshToken', refreshToken);
+      Cookies.set('sadean_token', accessToken, {
+        expires: 1 / 96,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+      });
+      set({ user, isAuthenticated: true, isLoading: false });
+    } catch (error: any) {
+      set({ error: error.response?.data?.message || 'Login Google gagal', isLoading: false });
       throw error;
     }
   },
@@ -62,7 +83,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
-      Cookies.set('sadean_token', accessToken, { expires: 7, secure: false });
+       Cookies.set('sadean_token', accessToken, { expires: 1 / 96, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/' });
       
       set({ user, isAuthenticated: true, isLoading: false });
     } catch (error: any) {
@@ -94,7 +115,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       }
 
       const response = await usersApi.getProfile();
-      Cookies.set('sadean_token', token, { expires: 7, secure: false });
+       Cookies.set('sadean_token', token, { expires: 1 / 96, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/' });
       set({ user: response.data, isAuthenticated: true, isLoading: false });
     } catch (error) {
       localStorage.removeItem('accessToken');

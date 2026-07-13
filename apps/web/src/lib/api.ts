@@ -66,7 +66,7 @@ api.interceptors.response.use(
         const { accessToken, refreshToken: newRefreshToken } = response.data;
         localStorage.setItem('accessToken', accessToken);
         localStorage.setItem('refreshToken', newRefreshToken);
-        document.cookie = `sadean_token=${accessToken}; path=/; max-age=604800`;
+        document.cookie = `sadean_token=${accessToken}; path=/; max-age=900; samesite=lax${location.protocol === 'https:' ? '; secure' : ''}`;
 
         processQueue(null, accessToken);
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
@@ -99,6 +99,8 @@ export const authApi = {
 
   login: (data: { email: string; password: string }) =>
     api.post('/auth/login', data),
+
+  google: (accessToken: string) => api.post('/auth/google', { accessToken }),
 
   logout: () => api.post('/auth/logout'),
 

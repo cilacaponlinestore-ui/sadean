@@ -6,6 +6,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
+import { createClient } from '@supabase/supabase-js';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -68,6 +69,10 @@ export class AuthService {
       throw new UnauthorizedException('Akun Anda telah dinonaktifkan');
     }
 
+    if (!user.password) {
+      throw new UnauthorizedException('Gunakan login Google untuk akun ini');
+    }
+
     const isPasswordValid = await bcrypt.compare(dto.password, user.password);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
@@ -91,11 +96,73 @@ export class AuthService {
     };
   }
 
+  async googleLogin(accessToken: string) {
+    const supabase = createClient(
+      this.configService.getOrThrow('SUPABASE_URL'),
+      this.configService.getOrThrow('SUPABASE_ANON_KEY'),
+      { auth: { persistSession: false, autoRefreshToken: false } },
+    );
+    const { data, error } = await supabase.auth.getUser(accessToken);
+    const identity = data.user;
+    const providers = [
+      identity?.app_metadata?.provider,
+      ...(identity?.app_metadata?.providers || []),
+      ...(identity?.identities?.map((item) => item.provider) || []),
+    ];
+
+    if (error || !identity?.id || !identity.email || !identity.email_confirmed_at || !providers.includes('google')) {
+      throw new UnauthorizedException('Identitas Google tidak valid');
+    }
+
+    const email = identity.email.trim().toLowerCase();
+    let user = await this.prisma.user.findFirst({
+      where: { OR: [{ supabaseAuthId: identity.id }, { email }] },
+    });
+
+    if (user?.supabaseAuthId && user.supabaseAuthId !== identity.id) {
+      throw new ConflictException('Email sudah terhubung ke akun Google lain');
+    }
+
+    if (!user) {
+      const name = String(identity.user_metadata?.full_name || identity.user_metadata?.name || email.split('@')[0]).slice(0, 100);
+      const avatar = typeof identity.user_metadata?.avatar_url === 'string' ? identity.user_metadata.avatar_url : null;
+      user = await this.prisma.user.create({
+        data: { email, password: null, name, avatar, role: 'buyer', supabaseAuthId: identity.id },
+      });
+    } else if (!user.supabaseAuthId) {
+      user = await this.prisma.user.update({
+        where: { id: user.id },
+        data: { supabaseAuthId: identity.id },
+      });
+    }
+
+    if (!user.isActive) throw new UnauthorizedException('Akun Anda telah dinonaktifkan');
+
+    const tokens = await this.generateTokens(user.id, user.email, user.role);
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { refreshToken: tokens.refreshToken, lastLogin: new Date() },
+    });
+
+    return {
+      user: { id: user.id, email: user.email, name: user.name, role: user.role, avatar: user.avatar },
+      ...tokens,
+    };
+  }
+
   async refreshTokens(refreshToken: string) {
+    try {
+      this.jwtService.verify(refreshToken, {
+        secret: this.configService.getOrThrow('JWT_REFRESH_SECRET'),
+      });
+    } catch {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+
     const user = await this.prisma.user.findFirst({
       where: { refreshToken },
     });
-    if (!user) {
+    if (!user || !user.isActive) {
       throw new UnauthorizedException('Invalid refresh token');
     }
 

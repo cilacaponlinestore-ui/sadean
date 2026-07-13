@@ -1,141 +1,71 @@
 import Link from 'next/link';
 import BannerSlider from '@/components/BannerSlider';
+import Navbar from '@/components/Navbar';
+import { ProductCard, SellerCard } from '@/components/MarketplaceCards';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
 
-async function fetchBanners() {
+async function get(path: string, revalidate: number) {
   try {
-    const res = await fetch(`${API}/banners`, { next: { revalidate: 60 } });
-    if (!res.ok) return [];
-    return res.json();
-  } catch { return [] }
-}
-
-async function fetchProducts() {
-  try {
-    const res = await fetch(`${API}/products?limit=8`, { next: { revalidate: 60 } });
-    if (!res.ok) return [];
-    const data = await res.json();
-    return data.products || [];
-  } catch { return [] }
-}
-
-async function fetchSellers() {
-  try {
-    const res = await fetch(`${API}/sellers`, { next: { revalidate: 120 } });
-    if (!res.ok) return [];
-    return res.json();
-  } catch { return [] }
-}
-
-function formatPrice(price: number) {
-  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(price);
+    const response = await fetch(`${API}${path}`, { next: { revalidate } });
+    return response.ok ? response.json() : null;
+  } catch { return null; }
 }
 
 export default async function Home() {
-  const [banners, products, sellers] = await Promise.all([
-    fetchBanners(),
-    fetchProducts(),
-    fetchSellers(),
+  const [banners, productData, sellers] = await Promise.all([
+    get('/banners', 60), get('/products?limit=8', 60), get('/sellers', 120),
   ]);
+  const products = productData?.products || [];
+  const sellerList = Array.isArray(sellers) ? sellers.slice(0, 4) : [];
 
   return (
-    <main>
-      <section className="bg-gradient-to-b from-primary-50 to-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <BannerSlider banners={banners} />
-        </div>
-      </section>
-
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">Produk Unggulan</h2>
-            <p className="text-gray-500 mt-1">Produk terbaik dari UMKM Cilacap</p>
-          </div>
-          <Link href="/products" className="text-primary-600 hover:text-primary-700 font-medium text-sm">
-            Lihat Semua &rarr;
-          </Link>
-        </div>
-
-        {products.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-xl">
-            <p className="text-gray-500">Belum ada produk</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {products.map((p: any) => (
-              <Link key={p.id} href={`/products/${p.slug}`}
-                className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden group">
-                <div className="aspect-square bg-gray-100">
-                  {p.images?.[0]?.url ? (
-                    <img src={p.images[0].imageUrl} alt={p.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-4xl">📦</div>
-                  )}
-                </div>
-                <div className="p-4">
-                  <p className="text-xs text-primary-600 font-medium mb-1">{p.category?.name}</p>
-                  <h3 className="font-medium text-gray-900 line-clamp-2 mb-1">{p.name}</h3>
-                  <p className="text-sm text-gray-500 mb-2">{p.seller?.storeName}</p>
-                  <p className="text-lg font-bold text-primary-600">{formatPrice(p.price)}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
-      </section>
-
-      {sellers.length > 0 && (
-        <section className="bg-gray-50 py-12">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">UMKM Terbaru</h2>
-                <p className="text-gray-500 mt-1">Toko lokal terpercaya di Cilacap</p>
+    <div className="min-h-screen bg-canvas">
+      <Navbar />
+      <main id="main-content">
+        <section className="relative overflow-hidden border-b border-black/5 bg-[#e8f5ee]">
+          <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-clay-100/80 blur-3xl" />
+          <div className="page-container relative grid gap-8 py-10 lg:grid-cols-[.9fr_1.1fr] lg:items-center lg:py-16">
+            <div className="max-w-xl">
+              <p className="eyebrow">Pasar digital Cilacap</p>
+              <h1 className="mt-4 text-4xl font-black leading-[1.08] tracking-[-.04em] text-ink sm:text-5xl lg:text-6xl">Belanja dekat,<br /><span className="text-primary-700">dampaknya besar.</span></h1>
+              <p className="mt-5 max-w-lg text-base leading-7 text-gray-600 sm:text-lg">Temukan rasa, karya, dan usaha terbaik dari wong Cilacap. Langsung dari UMKM lokal, tanpa ribet.</p>
+              <form action="/products" className="mt-7 flex rounded-2xl border border-black/10 bg-white p-2 shadow-soft">
+                <label htmlFor="home-search" className="sr-only">Cari produk lokal</label>
+                <input id="home-search" name="search" placeholder="Cari lanting, batik, kerajinan..." className="min-w-0 flex-1 bg-transparent px-3 text-sm outline-none sm:text-base" />
+                <button className="focus-ring rounded-xl bg-primary-700 px-5 py-3 text-sm font-bold text-white hover:bg-primary-800">Cari</button>
+              </form>
+              <div className="mt-6 flex flex-wrap gap-x-6 gap-y-3 text-sm font-semibold text-gray-600">
+                <span>✓ UMKM terkurasi</span><span>✓ Kontak langsung</span><span>✓ Produk khas daerah</span>
               </div>
-              <Link href="/sellers" className="text-primary-600 hover:text-primary-700 font-medium text-sm">
-                Lihat Semua &rarr;
-              </Link>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {sellers.map((s: any) => (
-                <Link key={s.id} href={`/sellers/${s.slug}`}
-                  className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow p-6 text-center">
-                  <div className="w-20 h-20 mx-auto bg-primary-100 rounded-full flex items-center justify-center mb-4 overflow-hidden">
-                    {s.logo ? (
-                      <img src={s.logo} alt={s.storeName} className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="text-3xl text-primary-600 font-bold">{s.storeName.charAt(0)}</span>
-                    )}
-                  </div>
-                  <h3 className="font-medium text-gray-900 mb-1">{s.storeName}</h3>
-                  {s.address && <p className="text-sm text-gray-500 line-clamp-2">{s.address}</p>}
-                  <p className="text-xs text-gray-400 mt-2">{s._count?.products || 0} produk</p>
-                </Link>
-              ))}
-            </div>
+            <div>{banners?.length ? <BannerSlider banners={banners} /> : <div className="surface flex min-h-[320px] items-end bg-gradient-to-br from-primary-800 via-primary-700 to-clay-600 p-8 text-white"><div><p className="text-sm font-bold uppercase tracking-[.2em] text-primary-100">Dari Cilacap untuk Indonesia</p><p className="mt-3 max-w-md text-3xl font-black">Produk lokal yang punya cerita.</p></div></div>}</div>
           </div>
         </section>
-      )}
 
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
-        <h2 className="text-3xl font-bold text-gray-900 mb-4">Gabung Jadi UMKM Cilacap</h2>
-        <p className="text-gray-500 max-w-xl mx-auto mb-8">
-          Punya usaha lokal? Kembangkan bisnismu bersama SADEAN. Daftar jadi seller dan jangkau lebih banyak pembeli.
-        </p>
-        <div className="flex gap-4 justify-center">
-          <Link href="/seller/register"
-            className="px-8 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 font-medium transition">
-            Daftar Jadi Seller
-          </Link>
-          <Link href="/products"
-            className="px-8 py-3 border border-primary-600 text-primary-600 rounded-xl hover:bg-primary-50 font-medium transition">
-            Mulai Belanja
-          </Link>
-        </div>
-      </section>
-    </main>
+        <section className="page-container py-14 sm:py-20">
+          <div className="mb-8 flex items-end justify-between gap-4">
+            <div><p className="eyebrow">Pilihan hari ini</p><h2 className="section-heading mt-2">Produk unggulan Cilacap</h2><p className="mt-2 text-gray-500">Dikurasi dari toko lokal yang aktif.</p></div>
+            <Link href="/products" className="focus-ring shrink-0 rounded-xl px-3 py-2 text-sm font-bold text-primary-700 hover:bg-primary-50">Lihat semua →</Link>
+          </div>
+          {products.length ? <div className="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">{products.map((product: any) => <ProductCard key={product.id} product={product} />)}</div> : <div className="surface py-14 text-center text-gray-500">Produk pilihan sedang disiapkan.</div>}
+        </section>
+
+        <section className="border-y border-black/5 bg-white/60 py-14 sm:py-20">
+          <div className="page-container">
+            <div className="mb-8 flex items-end justify-between gap-4"><div><p className="eyebrow">Kenal penjualnya</p><h2 className="section-heading mt-2">Toko lokal, wajah lokal</h2><p className="mt-2 text-gray-500">Belanja langsung dan tumbuh bersama pelaku usaha sekitar.</p></div><Link href="/sellers" className="focus-ring shrink-0 rounded-xl px-3 py-2 text-sm font-bold text-primary-700 hover:bg-primary-50">Jelajahi toko →</Link></div>
+            {sellerList.length ? <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{sellerList.map((seller: any) => <SellerCard key={seller.id} seller={seller} />)}</div> : <div className="surface py-14 text-center text-gray-500">Toko lokal segera hadir.</div>}
+          </div>
+        </section>
+
+        <section className="page-container py-14 sm:py-20">
+          <div className="overflow-hidden rounded-[2rem] bg-ink px-6 py-10 text-white sm:px-10 lg:flex lg:items-center lg:justify-between lg:px-14">
+            <div><p className="text-xs font-bold uppercase tracking-[.2em] text-primary-300">Punya usaha di Cilacap?</p><h2 className="mt-3 text-3xl font-black tracking-tight">Buka etalase digitalmu hari ini.</h2><p className="mt-3 max-w-2xl leading-7 text-white/70">Kelola produk, terima pesanan, dan lebih mudah ditemukan pembeli lokal.</p></div>
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row lg:mt-0"><Link href="/seller/register" className="focus-ring rounded-xl bg-primary-500 px-6 py-3 text-center font-bold text-white hover:bg-primary-400">Daftar sebagai seller</Link><Link href="/products" className="focus-ring rounded-xl border border-white/20 px-6 py-3 text-center font-bold hover:bg-white/10">Lihat marketplace</Link></div>
+          </div>
+        </section>
+      </main>
+      <footer className="border-t border-black/5 bg-white py-8"><div className="page-container flex flex-col gap-2 text-sm text-gray-500 sm:flex-row sm:items-center sm:justify-between"><p><strong className="text-ink">SADEAN</strong> · Dodolane Wong Cilacap</p><p>Marketplace lokal untuk ekonomi yang lebih dekat.</p></div></footer>
+    </div>
   );
 }

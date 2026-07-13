@@ -20,7 +20,7 @@ Tidak perlu setup apa-apa. DB udah running.
 1. Push repo ke GitHub
 2. Login https://railway.app → New Project → Deploy from GitHub
 3. Pilih repo, set Root Directory = `apps/api`
-4. Start Command: `node dist/main`
+4. Start Command: `node apps/api/dist/src/main.js`
 5. Set environment variables di dashboard Railway:
    ```
    NODE_ENV=production

@@ -8,9 +8,10 @@ import Navbar from '@/components/Navbar';
 interface Seller {
   id: string;
   storeName: string;
+  slug: string;
   description: string;
   logo: string;
-  productCount: number;
+  _count: { products: number };
 }
 
 export default function SellersPage() {
@@ -53,7 +54,7 @@ export default function SellersPage() {
             {sellers.map((seller) => (
               <Link
                 key={seller.id}
-                href={`/sellers/${seller.id}`}
+                href={`/sellers/${seller.slug}`}
                 className="bg-white rounded-lg shadow hover:shadow-md transition-shadow p-6"
               >
                 <div className="flex items-center gap-4 mb-4">
@@ -66,7 +67,7 @@ export default function SellersPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900">{seller.storeName}</h3>
-                    <p className="text-sm text-gray-500">{seller.productCount} produk</p>
+                    <p className="text-sm text-gray-500">{seller._count?.products || 0} produk</p>
                   </div>
                 </div>
                 <p className="text-gray-600 text-sm line-clamp-2">

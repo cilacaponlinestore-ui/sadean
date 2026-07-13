@@ -1,6 +1,7 @@
 import {
   Controller,
   Post,
+  Body,
   UseInterceptors,
   UploadedFile,
   UseGuards,
@@ -40,7 +41,7 @@ export class StorageController {
   )
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
-    @UploadedFile('folder') folder: string = 'uploads',
+    @Body('folder') folder: string = 'uploads',
   ) {
     if (!file) {
       throw new BadRequestException('No file uploaded');

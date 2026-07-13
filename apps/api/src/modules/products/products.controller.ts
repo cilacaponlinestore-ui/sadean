@@ -9,6 +9,7 @@ import {
   UseGuards,
   Req,
   Query,
+  ForbiddenException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -36,8 +37,8 @@ export class ProductsController {
   @ApiOperation({ summary: 'Create new product (Seller only)' })
   @ApiResponse({ status: 201, description: 'Product created' })
   async create(@Req() req: any, @Body() dto: CreateProductDto) {
-    // Get seller ID from user
     const seller = req.user.seller;
+    if (!seller) throw new ForbiddenException('Seller profile not found');
     return this.productsService.create(seller.id, dto);
   }
 
@@ -48,6 +49,7 @@ export class ProductsController {
   @ApiOperation({ summary: 'Get my products (Seller only)' })
   async getMyProducts(@Req() req: any) {
     const seller = req.user.seller;
+    if (!seller) throw new ForbiddenException('Seller profile not found');
     return this.productsService.findBySellerId(seller.id);
   }
 
@@ -106,6 +108,7 @@ export class ProductsController {
     @Body() dto: UpdateProductDto,
   ) {
     const seller = req.user.seller;
+    if (!seller) throw new ForbiddenException('Seller profile not found');
     return this.productsService.update(id, seller.id, dto);
   }
 
@@ -116,6 +119,7 @@ export class ProductsController {
   @ApiOperation({ summary: 'Delete product (Seller only)' })
   async delete(@Param('id') id: string, @Req() req: any) {
     const seller = req.user.seller;
+    if (!seller) throw new ForbiddenException('Seller profile not found');
     return this.productsService.delete(id, seller.id);
   }
 
@@ -131,6 +135,7 @@ export class ProductsController {
     @Body('isPrimary') isPrimary?: boolean,
   ) {
     const seller = req.user.seller;
+    if (!seller) throw new ForbiddenException('Seller profile not found');
     return this.productsService.addImage(id, seller.id, imageUrl, isPrimary);
   }
 
@@ -145,6 +150,7 @@ export class ProductsController {
     @Req() req: any,
   ) {
     const seller = req.user.seller;
+    if (!seller) throw new ForbiddenException('Seller profile not found');
     return this.productsService.deleteImage(imageId, seller.id);
   }
 }

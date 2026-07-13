@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { SellerStatus } from '@prisma/client';
 
 @Injectable()
 export class AdminService {
@@ -36,7 +37,7 @@ export class AdminService {
           images: { where: { isPrimary: true }, take: 1 },
         },
       }),
-      this.prisma.seller.count({ where: { status: 'PENDING' } }),
+      this.prisma.seller.count({ where: { status: SellerStatus.PENDING } }),
     ]);
 
     return {

@@ -85,6 +85,16 @@ export default function DashboardPage() {
             </div>
             <div className="flex items-center gap-4">
               <span className="text-sm text-gray-700">{user.name}</span>
+              {user.role === 'seller' && (
+                <Link href="/seller/products" className="text-sm text-primary-600 hover:text-primary-700">
+                  Panel Toko
+                </Link>
+              )}
+              {user.role === 'admin' && (
+                <Link href="/admin/users" className="text-sm text-primary-600 hover:text-primary-700">
+                  Panel Admin
+                </Link>
+              )}
               <button
                 onClick={handleLogout}
                 className="px-4 py-2 text-sm text-red-600 hover:text-red-700"

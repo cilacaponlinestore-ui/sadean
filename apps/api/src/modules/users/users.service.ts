@@ -60,6 +60,9 @@ export class UsersService {
   }
 
   async updateAvatar(id: string, avatarUrl: string) {
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    if (!user) throw new NotFoundException('User not found');
+
     return this.prisma.user.update({
       where: { id },
       data: { avatar: avatarUrl },

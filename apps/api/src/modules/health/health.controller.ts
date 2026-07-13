@@ -7,8 +7,14 @@ import { PrismaService } from '../../prisma/prisma.service';
 export class HealthController {
   constructor(private prisma: PrismaService) {}
 
+  @Get('health/live')
+  @ApiOperation({ summary: 'Application liveness check' })
+  live() {
+    return { status: 'ok', timestamp: new Date().toISOString() };
+  }
+
   @Get('health')
-  @ApiOperation({ summary: 'Health check endpoint' })
+  @ApiOperation({ summary: 'Application and database readiness check' })
   async check() {
     try {
       await this.prisma.$queryRaw`SELECT 1`;

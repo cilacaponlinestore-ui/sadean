@@ -16,6 +16,13 @@ describe('HealthController', () => {
     prisma = module.get<PrismaService>(PrismaService);
   });
 
+  it('should report application liveness without querying the database', () => {
+    const query = jest.spyOn(prisma, '$queryRaw');
+
+    expect(controller.live().status).toBe('ok');
+    expect(query).not.toHaveBeenCalled();
+  });
+
   it('should return ok when db is connected', async () => {
     jest.spyOn(prisma, '$queryRaw').mockResolvedValue([{ '1': 1 }]);
     const result = await controller.check();

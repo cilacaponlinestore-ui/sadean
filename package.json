@@ -1,0 +1,44 @@
+{
+  "name": "sadean",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Platform Digital UMKM Cilacap",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "test": "turbo test",
+    "typecheck": "turbo typecheck",
+    "clean": "turbo clean",
+    "db:studio": "npm run studio --workspace=apps/api",
+    "db:push": "npm run prisma:push --workspace=apps/api",
+    "db:seed": "npm run prisma:seed --workspace=apps/api",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f",
+    "web dev": "npm run dev --workspace=apps/web",
+    "web build": "npm run build --workspace=apps/web",
+    "web start": "npm run start --workspace=apps/web",
+    "api dev": "npm run dev --workspace=apps/api",
+    "api build": "npm run build --workspace=apps/api",
+    "api start": "npm run start --workspace=apps/api"
+  },
+  "devDependencies": {
+    "es-abstract": "^1.24.2",
+    "turbo": "^2.10.4",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
+  "packageManager": "npm@10.2.0",
+  "dependencies": {
+    "@nestjs/core": "11.1.28",
+    "next": "14.2.35"
+  }
+}

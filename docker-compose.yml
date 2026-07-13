@@ -1,0 +1,111 @@
+services:
+  # ==================== API ====================
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: sadean-api
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://sadean:sadean_secret@postgres:5432/sadean
+      - REDIS_URL=redis://redis:6379
+      - MINIO_ENDPOINT=minio
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+      - JWT_SECRET=dev-jwt-secret
+      - REFRESH_TOKEN_SECRET=dev-refresh-secret
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    volumes:
+      - ./uploads:/app/uploads
+    networks:
+      - sadean-network
+
+  # ==================== WEB ====================
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    container_name: sadean-web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:3001/api/v1
+    depends_on:
+      - api
+
+    networks:
+      - sadean-network
+
+  # ==================== POSTGRESQL ====================
+  postgres:
+    image: postgres:16-alpine
+    container_name: sadean-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=sadean
+      - POSTGRES_USER=sadean
+      - POSTGRES_PASSWORD=sadean_secret
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sadean"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sadean-network
+
+  # ==================== REDIS ====================
+  redis:
+    image: redis:7-alpine
+    container_name: sadean-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sadean-network
+
+  # ==================== MINIO ====================
+  minio:
+    image: minio/minio:latest
+    container_name: sadean-minio
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - sadean-network
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+
+networks:
+  sadean-network:
+    driver: bridge

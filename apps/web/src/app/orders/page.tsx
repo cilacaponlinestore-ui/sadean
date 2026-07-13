@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import api from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
 import Navbar from '@/components/Navbar';
+import toast from 'react-hot-toast';
 
 interface Order {
   id: string;
@@ -43,6 +45,8 @@ export default function OrdersPage() {
   const { isAuthenticated, isLoading } = useAuthStore();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -52,14 +56,16 @@ export default function OrdersPage() {
 
   useEffect(() => {
     loadOrders();
-  }, []);
+  }, [page]);
 
   const loadOrders = async () => {
+    setLoading(true);
     try {
-      const response = await api.get('/orders/my-orders');
+      const response = await api.get(`/orders/my-orders?page=${page}&limit=10`);
       setOrders(response.data.orders || []);
+      setTotalPages(response.data.pagination?.totalPages || 1);
     } catch (error) {
-      console.error('Failed to load orders:', error);
+      toast.error('Gagal memuat pesanan');
     } finally {
       setLoading(false);
     }
@@ -110,7 +116,7 @@ export default function OrdersPage() {
               <div key={order.id} className="bg-white rounded-lg shadow p-6">
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <p className="font-semibold">{order.orderNumber}</p>
+                    <Link href={`/orders/${order.id}`} className="font-semibold text-primary-600 hover:underline">{order.orderNumber}</Link>
                     <p className="text-sm text-gray-500">{formatDate(order.createdAt)}</p>
                   </div>
                   <span className={`px-3 py-1 text-xs font-medium rounded ${statusColors[order.status]}`}>
@@ -139,6 +145,24 @@ export default function OrdersPage() {
                 </div>
               </div>
             ))}
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center gap-2 pt-4">
+                <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
+                  className="px-3 py-1.5 border rounded-lg text-sm disabled:opacity-50 hover:bg-gray-50">
+                  Prev
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+                  <button key={p} onClick={() => setPage(p)}
+                    className={`px-3 py-1.5 border rounded-lg text-sm ${p === page ? 'bg-primary-600 text-white' : 'hover:bg-gray-50'}`}>
+                    {p}
+                  </button>
+                ))}
+                <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
+                  className="px-3 py-1.5 border rounded-lg text-sm disabled:opacity-50 hover:bg-gray-50">
+                  Next
+                </button>
+              </div>
+            )}
           </div>
         )}
       </main>

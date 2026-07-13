@@ -28,7 +28,7 @@ export default function AdminUsersPage() {
       const response = await api.get<{ users: User[] }>('/users');
       setUsers(response.data.users);
     } catch (error) {
-      console.error('Failed to load users:', error);
+      toast.error('Gagal memuat pengguna');
     } finally {
       setLoading(false);
     }

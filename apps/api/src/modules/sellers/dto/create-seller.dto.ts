@@ -26,4 +26,9 @@ export class CreateSellerDto {
   @IsOptional()
   @IsString()
   whatsapp?: string;
+
+  @ApiPropertyOptional({ example: 'https://xyz.supabase.co/storage/v1/object/public/sadean/logos/uuid.jpg' })
+  @IsOptional()
+  @IsString()
+  logo?: string;
 }

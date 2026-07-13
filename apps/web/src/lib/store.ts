@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { authApi, usersApi } from './api';
+import Cookies from 'js-cookie';
 
 interface User {
   id: string;
@@ -43,6 +44,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
+      Cookies.set('sadean_token', accessToken, { expires: 7, secure: false });
       
       set({ user, isAuthenticated: true, isLoading: false });
     } catch (error: any) {
@@ -60,6 +62,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
+      Cookies.set('sadean_token', accessToken, { expires: 7, secure: false });
       
       set({ user, isAuthenticated: true, isLoading: false });
     } catch (error: any) {
@@ -77,6 +80,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     } finally {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
+      Cookies.remove('sadean_token');
       set({ user: null, isAuthenticated: false });
     }
   },
@@ -90,10 +94,12 @@ export const useAuthStore = create<AuthState>((set) => ({
       }
 
       const response = await usersApi.getProfile();
+      Cookies.set('sadean_token', token, { expires: 7, secure: false });
       set({ user: response.data, isAuthenticated: true, isLoading: false });
     } catch (error) {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
+      Cookies.remove('sadean_token');
       set({ user: null, isAuthenticated: false, isLoading: false });
     }
   },

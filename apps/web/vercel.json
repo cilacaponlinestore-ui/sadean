@@ -1,0 +1,7 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "npx turbo build --filter=@sadean/web",
+  "outputDirectory": ".next",
+  "installCommand": "npm install",
+  "ignoreCommand": "npx turbo-ignore"
+}

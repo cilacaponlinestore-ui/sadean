@@ -1,0 +1,17 @@
+node_modules
+.next
+dist
+.git
+.gitignore
+*.log
+.env
+.env.local
+.env.*.local
+Dockerfile
+.dockerignore
+README.md
+CHANGELOG.md
+CONTRIBUTING.md
+CONTINUE.md
+design
+docs

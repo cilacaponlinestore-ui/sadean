@@ -39,7 +39,7 @@ export default function AdminProductsPage() {
       setProducts(response.data.products);
       setTotalPages(response.data.pagination.totalPages);
     } catch (error) {
-      console.error('Failed to load products:', error);
+      toast.error('Gagal memuat produk');
     } finally {
       setLoading(false);
     }

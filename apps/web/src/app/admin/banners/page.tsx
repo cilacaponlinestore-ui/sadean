@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
+import ImageUploader from '@/components/ImageUploader';
+import type { ImageItem } from '@/components/ImageUploader';
 
 interface Banner {
   id: string;
@@ -15,7 +17,6 @@ interface Banner {
 
 const emptyForm = {
   title: '',
-  imageUrl: '',
   link: '',
   sortOrder: 0,
 };
@@ -26,6 +27,7 @@ export default function AdminBannersPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState(emptyForm);
+  const [uploadedImage, setUploadedImage] = useState<ImageItem[]>([]);
 
   useEffect(() => {
     loadBanners();
@@ -36,7 +38,7 @@ export default function AdminBannersPage() {
       const response = await api.get<Banner[]>('/banners/admin');
       setBanners(response.data);
     } catch (error) {
-      console.error('Failed to load banners:', error);
+      toast.error('Gagal memuat banner');
     } finally {
       setLoading(false);
     }
@@ -44,8 +46,12 @@ export default function AdminBannersPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (uploadedImage.length === 0) {
+      toast.error('Pilih gambar banner terlebih dahulu');
+      return;
+    }
     try {
-      const payload = { ...formData, link: formData.link || undefined };
+      const payload = { ...formData, imageUrl: uploadedImage[0].url, link: formData.link || undefined };
       if (editingId) {
         await api.put(`/banners/${editingId}`, payload);
       } else {
@@ -55,6 +61,7 @@ export default function AdminBannersPage() {
       setShowForm(false);
       setEditingId(null);
       setFormData(emptyForm);
+      setUploadedImage([]);
       loadBanners();
     } catch (error) {
       toast.error(editingId ? 'Gagal memperbarui banner' : 'Gagal menambahkan banner');
@@ -76,10 +83,10 @@ export default function AdminBannersPage() {
     setEditingId(banner.id);
     setFormData({
       title: banner.title,
-      imageUrl: banner.imageUrl,
       link: banner.link || '',
       sortOrder: banner.sortOrder,
     });
+    setUploadedImage([{ url: banner.imageUrl, isPrimary: true }]);
     setShowForm(true);
   };
 
@@ -106,6 +113,7 @@ export default function AdminBannersPage() {
             setShowForm(!showForm);
             setEditingId(null);
             setFormData(emptyForm);
+            setUploadedImage([]);
           }}
           className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
         >
@@ -123,16 +131,6 @@ export default function AdminBannersPage() {
                 type="text"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">URL Gambar</label>
-              <input
-                type="url"
-                value={formData.imageUrl}
-                onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
                 className="w-full px-3 py-2 border rounded-lg"
                 required
               />
@@ -157,11 +155,14 @@ export default function AdminBannersPage() {
               />
             </div>
           </div>
-          {formData.imageUrl && (
-            <div className="mt-4 w-64 h-32 bg-gray-100 rounded-lg overflow-hidden">
-              <img src={formData.imageUrl} alt="Preview banner" className="w-full h-full object-cover" />
-            </div>
-          )}
+          <div className="mt-4">
+            <ImageUploader
+              images={uploadedImage}
+              onChange={setUploadedImage}
+              maxImages={1}
+              folder="banners"
+            />
+          </div>
           <button
             type="submit"
             className="mt-4 px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"

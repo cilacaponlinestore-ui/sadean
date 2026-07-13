@@ -12,4 +12,9 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   phone?: string;
+
+  @ApiPropertyOptional({ example: 'https://xyz.supabase.co/storage/v1/object/public/sadean/avatars/uuid.jpg' })
+  @IsOptional()
+  @IsString()
+  avatar?: string;
 }

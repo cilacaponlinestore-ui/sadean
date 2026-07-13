@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
 import { usersApi } from '@/lib/api';
 import toast from 'react-hot-toast';
+import ImageUploader from '@/components/ImageUploader';
+import type { ImageItem } from '@/components/ImageUploader';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -15,6 +17,7 @@ export default function ProfilePage() {
     phone: '',
   });
   const [saving, setSaving] = useState(false);
+  const [uploadedAvatar, setUploadedAvatar] = useState<ImageItem[]>([]);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -36,9 +39,14 @@ export default function ProfilePage() {
     setSaving(true);
 
     try {
-      await usersApi.updateProfile(formData);
+      const payload: any = { ...formData };
+      if (uploadedAvatar.length > 0) {
+        payload.avatar = uploadedAvatar[0].url;
+      }
+      await usersApi.updateProfile(payload);
       await loadUser();
       setEditing(false);
+      setUploadedAvatar([]);
       toast.success('Profil berhasil diperbarui');
     } catch (error) {
       toast.error('Gagal memperbarui profil');
@@ -104,6 +112,14 @@ export default function ProfilePage() {
             <form onSubmit={handleSubmit}>
               <div className="space-y-4">
                 <div>
+                  <ImageUploader
+                    images={uploadedAvatar}
+                    onChange={setUploadedAvatar}
+                    maxImages={1}
+                    folder="avatars"
+                  />
+                </div>
+                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Nama Lengkap
                   </label>
@@ -152,6 +168,7 @@ export default function ProfilePage() {
                   type="button"
                   onClick={() => {
                     setEditing(false);
+                    setUploadedAvatar([]);
                     setFormData({
                       name: user.name || '',
                       phone: user.phone || '',
@@ -192,7 +209,12 @@ export default function ProfilePage() {
                 </div>
               </div>
               <button
-                onClick={() => setEditing(true)}
+                onClick={() => {
+                  setEditing(true);
+                  if (user.avatar) {
+                    setUploadedAvatar([{ url: user.avatar, isPrimary: true }]);
+                  }
+                }}
                 className="mt-6 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
               >
                 Edit Profil

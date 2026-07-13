@@ -8,15 +8,11 @@ services:
     restart: unless-stopped
     ports:
       - "3001:3001"
+    env_file: .env
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
       - DATABASE_URL=postgresql://sadean:sadean_secret@postgres:5432/sadean
       - REDIS_URL=redis://redis:6379
-      - MINIO_ENDPOINT=minio
-      - MINIO_ACCESS_KEY=minioadmin
-      - MINIO_SECRET_KEY=minioadmin
-      - JWT_SECRET=dev-jwt-secret
-      - REFRESH_TOKEN_SECRET=dev-refresh-secret
     depends_on:
       postgres:
         condition: service_healthy

@@ -50,7 +50,7 @@ export default function DashboardPage() {
           setDashboardData(response.data);
         }
       } catch (error) {
-        console.error('Failed to load dashboard:', error);
+        toast.error('Gagal memuat dashboard');
       } finally {
         setLoading(false);
       }

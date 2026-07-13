@@ -41,7 +41,7 @@ export default function CartPage() {
       const response = await api.get('/cart');
       setItems(response.data.items || []);
     } catch (error) {
-      console.error('Failed to load cart:', error);
+      toast.error('Gagal memuat keranjang');
     } finally {
       setLoading(false);
     }

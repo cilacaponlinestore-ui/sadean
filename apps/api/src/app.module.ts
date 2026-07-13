@@ -13,7 +13,9 @@ import { BannersModule } from './modules/banners/banners.module';
 import { StorageModule } from './modules/storage/storage.module';
 import { CartModule } from './modules/cart/cart.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { FavoritesModule } from './modules/favorites/favorites.module';
 import { AuditModule } from './common/audit/audit.module';
+import { HealthModule } from './modules/health/health.module';
 import { RequestLoggingMiddleware } from './common/middleware/request-logging.middleware';
 
 @Module({
@@ -57,7 +59,9 @@ import { RequestLoggingMiddleware } from './common/middleware/request-logging.mi
     BannersModule,
     StorageModule,
     CartModule,
+    FavoritesModule,
     AdminModule,
+    HealthModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })

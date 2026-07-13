@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
 import { sellersApi } from '@/lib/api';
 import toast from 'react-hot-toast';
+import ImageUploader from '@/components/ImageUploader';
+import type { ImageItem } from '@/components/ImageUploader';
 
 export default function SellerRegisterPage() {
   const router = useRouter();
@@ -17,6 +19,7 @@ export default function SellerRegisterPage() {
     whatsapp: '',
   });
   const [loading, setLoading] = useState(false);
+  const [uploadedLogo, setUploadedLogo] = useState<ImageItem[]>([]);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -29,7 +32,11 @@ export default function SellerRegisterPage() {
     setLoading(true);
 
     try {
-      await sellersApi.create(formData);
+      const payload: any = { ...formData };
+      if (uploadedLogo.length > 0) {
+        payload.logo = uploadedLogo[0].url;
+      }
+      await sellersApi.create(payload);
       toast.success('Toko berhasil didaftarkan!');
       router.push('/dashboard');
     } catch (error: any) {
@@ -69,6 +76,14 @@ export default function SellerRegisterPage() {
 
           <form onSubmit={handleSubmit}>
             <div className="space-y-4">
+              <div>
+                <ImageUploader
+                  images={uploadedLogo}
+                  onChange={setUploadedLogo}
+                  maxImages={1}
+                  folder="logos"
+                />
+              </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Nama Toko <span className="text-red-500">*</span>

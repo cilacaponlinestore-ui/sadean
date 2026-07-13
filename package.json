@@ -28,6 +28,8 @@
     "api start": "npm run start --workspace=apps/api"
   },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
     "es-abstract": "^1.24.2",
     "turbo": "^2.10.4",
     "typescript": "^5.3.3"
@@ -39,6 +41,9 @@
   "packageManager": "npm@10.2.0",
   "dependencies": {
     "@nestjs/core": "11.1.28",
+    "@serwist/next": "^9.5.11",
+    "@serwist/precaching": "^9.5.11",
+    "@serwist/sw": "^9.5.11",
     "next": "14.2.35"
   }
 }

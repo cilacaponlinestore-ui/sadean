@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import api from '@/lib/api';
 import Navbar from '@/components/Navbar';
+import toast from 'react-hot-toast';
 
 interface Seller {
   id: string;
@@ -27,7 +28,7 @@ export default function SellersPage() {
       const response = await api.get('/sellers/public');
       setSellers(response.data);
     } catch (error) {
-      console.error('Failed to load sellers:', error);
+      toast.error('Gagal memuat data penjual');
     } finally {
       setLoading(false);
     }

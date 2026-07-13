@@ -12,7 +12,7 @@ interface Product {
   slug: string;
   price: number;
   stock: number;
-  images: { url: string }[];
+  images: { imageUrl: string }[];
   isActive: boolean;
   category: { name: string };
 }
@@ -31,7 +31,7 @@ export default function SellerProductsPage() {
       const response = await api.get('/products/my-products');
       setProducts(response.data);
     } catch (error) {
-      console.error('Failed to load products:', error);
+      toast.error('Gagal memuat produk');
     } finally {
       setLoading(false);
     }
@@ -113,7 +113,7 @@ export default function SellerProductsPage() {
                       <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
                         {product.images[0] ? (
                           <img
-                            src={product.images[0].url}
+                            src={product.images[0].imageUrl}
                             alt={product.name}
                             className="w-full h-full object-cover rounded-lg"
                           />

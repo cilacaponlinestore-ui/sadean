@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 
@@ -36,17 +37,22 @@ export default function SellerOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     loadOrders();
-  }, []);
+  }, [page, filter]);
 
   const loadOrders = async () => {
+    setLoading(true);
     try {
-      const response = await api.get('/orders/seller-orders');
+      const params = `?page=${page}&limit=10${filter !== 'all' ? `&status=${filter}` : ''}`;
+      const response = await api.get(`/orders/seller-orders${params}`);
       setOrders(response.data.orders || []);
+      setTotalPages(response.data.pagination?.totalPages || 1);
     } catch (error) {
-      console.error('Failed to load orders:', error);
+      toast.error('Gagal memuat pesanan');
     } finally {
       setLoading(false);
     }
@@ -79,6 +85,10 @@ export default function SellerOrdersPage() {
   };
 
   const filteredOrders = filter === 'all' ? orders : orders.filter((o) => o.status === filter);
+  const handleFilterChange = (status: string) => {
+    setFilter(status);
+    setPage(1);
+  };
 
   if (loading) {
     return <div className="text-center py-8">Memuat data...</div>;
@@ -93,7 +103,7 @@ export default function SellerOrdersPage() {
         {['all', 'pending', 'confirmed', 'processing', 'shipped', 'delivered'].map((status) => (
           <button
             key={status}
-            onClick={() => setFilter(status)}
+            onClick={() => handleFilterChange(status)}
             className={`px-4 py-2 text-sm rounded-lg whitespace-nowrap ${
               filter === status
                 ? 'bg-primary-600 text-white'
@@ -115,7 +125,7 @@ export default function SellerOrdersPage() {
             <div key={order.id} className="bg-white rounded-lg shadow p-6">
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <p className="font-semibold">{order.orderNumber}</p>
+                  <Link href={`/orders/${order.id}`} className="font-semibold text-primary-600 hover:underline">{order.orderNumber}</Link>
                   <p className="text-sm text-gray-500">{order.user.name}</p>
                 </div>
                 <span className={`px-3 py-1 text-xs font-medium rounded ${statusColors[order.status]}`}>
@@ -188,6 +198,24 @@ export default function SellerOrdersPage() {
               )}
             </div>
           ))}
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center gap-2 pt-4">
+              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
+                className="px-3 py-1.5 border rounded-lg text-sm disabled:opacity-50 hover:bg-gray-50">
+                Prev
+              </button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+                <button key={p} onClick={() => setPage(p)}
+                  className={`px-3 py-1.5 border rounded-lg text-sm ${p === page ? 'bg-primary-600 text-white' : 'hover:bg-gray-50'}`}>
+                  {p}
+                </button>
+              ))}
+              <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
+                className="px-3 py-1.5 border rounded-lg text-sm disabled:opacity-50 hover:bg-gray-50">
+                Next
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -139,10 +139,33 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Deploy to staging server
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Prisma migrations
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+        run: npx prisma migrate deploy --schema=apps/api/prisma/schema.prisma
+
+      - name: Build & deploy API
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
         run: |
-          echo "Deploying to staging..."
-          # Add your deployment script here
+          cd apps/api && npm run build
+          # Add your SSH/RSYNC deploy command here
+          # rsync -avz --delete dist/ user@staging-server:/app/api/dist
+
+      - name: Build & deploy Web
+        run: |
+          cd apps/web && npm run build
+          # Add your SSH/RSYNC deploy command here
+          # rsync -avz --delete .next/standalone/ user@staging-server:/app/web
 
   deploy-production:
     name: Deploy to Production
@@ -154,7 +177,30 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Deploy to production server
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Prisma migrations
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+        run: npx prisma migrate deploy --schema=apps/api/prisma/schema.prisma
+
+      - name: Deploy API to Railway
         run: |
-          echo "Deploying to production..."
-          # Add your deployment script here
+          curl -X POST ${{ secrets.RAILWAY_DEPLOY_HOOK }}
+        # Atau: trigger deploy via SSH/RSYNC
+
+      - name: Deploy Web to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: '--prod'
+          working-directory: apps/web

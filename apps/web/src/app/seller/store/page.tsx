@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
 import { sellersApi } from '@/lib/api';
 import toast from 'react-hot-toast';
+import ImageUploader from '@/components/ImageUploader';
+import type { ImageItem } from '@/components/ImageUploader';
 
 export default function SellerStorePage() {
   const router = useRouter();
@@ -20,6 +22,7 @@ export default function SellerStorePage() {
     whatsapp: '',
   });
   const [saving, setSaving] = useState(false);
+  const [uploadedLogo, setUploadedLogo] = useState<ImageItem[]>([]);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -57,9 +60,14 @@ export default function SellerStorePage() {
     setSaving(true);
 
     try {
-      await sellersApi.update(store.id, formData);
+      const payload: any = { ...formData };
+      if (uploadedLogo.length > 0) {
+        payload.logo = uploadedLogo[0].url;
+      }
+      await sellersApi.update(store.id, payload);
       toast.success('Toko berhasil diperbarui');
       setEditing(false);
+      setUploadedLogo([]);
       // Reload store data
       const response = await sellersApi.getMyStore();
       setStore(response.data);
@@ -141,6 +149,14 @@ export default function SellerStorePage() {
             <form onSubmit={handleSubmit}>
               <div className="space-y-4">
                 <div>
+                  <ImageUploader
+                    images={uploadedLogo}
+                    onChange={setUploadedLogo}
+                    maxImages={1}
+                    folder="logos"
+                  />
+                </div>
+                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Nama Toko <span className="text-red-500">*</span>
                   </label>
@@ -212,6 +228,7 @@ export default function SellerStorePage() {
                   type="button"
                   onClick={() => {
                     setEditing(false);
+                    setUploadedLogo([]);
                     setFormData({
                       storeName: store.storeName || '',
                       description: store.description || '',
@@ -262,12 +279,17 @@ export default function SellerStorePage() {
                   </div>
                 </div>
               </div>
-              <button
-                onClick={() => setEditing(true)}
-                className="mt-6 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
-              >
-                Edit Profil Toko
-              </button>
+                <button
+                  onClick={() => {
+                    setEditing(true);
+                    if (store.logo) {
+                      setUploadedLogo([{ url: store.logo, isPrimary: true }]);
+                    }
+                  }}
+                  className="mt-6 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+                >
+                  Edit Profil Toko
+                </button>
             </div>
           )}
         </div>

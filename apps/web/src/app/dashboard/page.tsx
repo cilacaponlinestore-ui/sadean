@@ -32,10 +32,9 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.push('/login');
-    }
-  }, [isLoading, isAuthenticated, router]);
+    if (!isLoading && !isAuthenticated) router.push('/login');
+    if (user?.role === 'buyer') router.replace('/');
+  }, [isLoading, isAuthenticated, user, router]);
 
   useEffect(() => {
     const loadDashboard = async () => {

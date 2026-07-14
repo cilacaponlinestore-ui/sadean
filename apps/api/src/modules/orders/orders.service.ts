@@ -304,30 +304,25 @@ export class OrdersService {
         break;
       case 'cancelled': {
         updateData.cancelledAt = new Date();
-        // Restore stock
-        const items = await this.prisma.orderItem.findMany({
-          where: { orderId: id },
-        });
-        for (const item of items) {
-          await this.prisma.product.update({
-            where: { id: item.productId },
-            data: {
-              stock: {
-                increment: item.quantity,
-              },
-            },
-          });
-        }
         break;
       }
-    }
 
-    return this.prisma.order.update({
-      where: { id },
-      data: updateData,
-      include: {
-        items: true,
-      },
+    return this.prisma.$transaction(async (tx) => {
+      if (updateData.cancelledAt) {
+        const items = await tx.orderItem.findMany({ where: { orderId: id } });
+        for (const item of items) {
+          await tx.product.update({
+            where: { id: item.productId },
+            data: { stock: { increment: item.quantity } },
+          });
+        }
+      }
+
+      return tx.order.update({
+        where: { id },
+        data: updateData,
+        include: { items: true },
+      });
     });
   }
 

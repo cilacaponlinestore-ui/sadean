@@ -6,17 +6,26 @@ export class CartService {
   constructor(private prisma: PrismaService) {}
 
   private async getOrCreateCart(userId: string) {
-    let cart = await this.prisma.cart.findUnique({
+    const existing = await this.prisma.cart.findUnique({
       where: { userId },
       include: { items: true },
     });
-    if (!cart) {
-      cart = await this.prisma.cart.create({
+    if (existing) return existing;
+
+    try {
+      return await this.prisma.cart.create({
         data: { userId },
         include: { items: true },
       });
+    } catch (err: any) {
+      if (err?.code === 'P2002') {
+        return this.prisma.cart.findUnique({
+          where: { userId },
+          include: { items: true },
+        })!;
+      }
+      throw err;
     }
-    return cart;
   }
 
   async getCart(userId: string) {

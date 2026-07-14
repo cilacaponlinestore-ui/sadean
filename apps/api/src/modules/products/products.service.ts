@@ -150,6 +150,7 @@ export class ProductsService {
 
     const where: any = {
       isActive: true,
+      seller: { isActive: true, isVerified: true },
     };
 
     if (category) {

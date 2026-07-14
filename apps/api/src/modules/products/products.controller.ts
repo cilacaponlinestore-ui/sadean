@@ -39,6 +39,8 @@ export class ProductsController {
   async create(@Req() req: any, @Body() dto: CreateProductDto) {
     const seller = req.user.seller;
     if (!seller) throw new ForbiddenException('Seller profile not found');
+    if (!seller.isVerified) throw new ForbiddenException('Akun seller Anda belum diverifikasi. Produk hanya bisa ditambahkan setelah toko disetujui admin.');
+    if (!seller.isActive) throw new ForbiddenException('Akun seller Anda sedang dinonaktifkan. Hubungi admin.');
     return this.productsService.create(seller.id, dto);
   }
 

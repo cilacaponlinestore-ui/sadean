@@ -3,7 +3,7 @@ import { OrdersService } from './orders.service';
 
 describe('OrdersService', () => {
   const user = { id: 'user-1', name: 'Dani' };
-  const seller = { id: 'seller-1', storeName: 'Toko', whatsapp: '6281' };
+  const seller = { id: 'seller-1', storeName: 'Toko', whatsapp: '6281', isVerified: true, isActive: true };
   const product = {
     id: 'product-1',
     name: 'Produk',

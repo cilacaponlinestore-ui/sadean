@@ -25,6 +25,10 @@ export class OrdersService {
       throw new NotFoundException('Seller not found');
     }
 
+    if (!seller.isVerified || !seller.isActive) {
+      throw new BadRequestException('Toko ini belum diverifikasi atau sedang dinonaktifkan');
+    }
+
     // Validate products and calculate totals
     let subtotal = 0;
     const orderItems = [];

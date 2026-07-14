@@ -19,7 +19,11 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  if (isAuthPage) return NextResponse.redirect(new URL('/dashboard', request.url))
+  if (isAuthPage) {
+    const role = extractRole(token);
+    if (role === 'buyer') return NextResponse.redirect(new URL('/', request.url));
+    return NextResponse.redirect(new URL('/dashboard', request.url));
+  }
 
   const role = extractRole(token)
 

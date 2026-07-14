@@ -29,14 +29,14 @@ export default async function Home() {
         <div className="page-container relative z-10 pb-20 pt-20 sm:pb-28 sm:pt-28 lg:flex lg:items-center lg:gap-16 lg:pb-36 lg:pt-36">
           <div className="max-w-2xl">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold text-primary-300 backdrop-blur">
-              <span className="h-1.5 w-1.5 rounded-full bg-primary-400" /> Pasar digital UMKM Cilacap
+              <span className="h-1.5 w-1.5 rounded-full bg-primary-400" /> Marketplace resmi UMKM Cilacap
             </div>
             <h1 className="text-4xl font-black leading-[1.06] tracking-[-.03em] text-white sm:text-5xl lg:text-6xl">
-              Belanja langsung<br />dari{' '}
-              <span className="bg-gradient-to-r from-primary-300 to-primary-500 bg-clip-text text-transparent">tetangga sendiri.</span>
+              Marketplace UMKM{' '}
+              <span className="bg-gradient-to-r from-primary-300 to-primary-500 bg-clip-text text-transparent">Cilacap</span>
             </h1>
             <p className="mt-6 max-w-xl text-base leading-7 text-white/65 sm:text-lg">
-              Platform yang menghubungkan kamu dengan ratusan pelaku UMKM di Cilacap. Produk asli, harga langsung, dan cerita di balik setiap pesanan.
+              Temukan produk lokal berkualitas langsung dari pelaku usaha di Cilacap — makanan khas, kerajinan tangan, dan oleh-oleh daerah dalam satu tempat.
             </p>
 
             <form action="/products" className="mt-8 flex max-w-lg rounded-2xl border border-white/10 bg-white/10 p-1.5 backdrop-blur">

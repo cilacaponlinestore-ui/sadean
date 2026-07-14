@@ -3,9 +3,10 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import api from '@/lib/api';
-import { useAuthStore } from '@/lib/store';
+import { useAuthGuard } from '@/lib/useAuthGuard';
 import Navbar from '@/components/Navbar';
 import toast from 'react-hot-toast';
+import { rupiah } from '@/lib/format';
 
 interface OrderItem {
   id: string;
@@ -41,7 +42,12 @@ interface Order {
 
 const statusLabels: Record<string, string> = {
   pending: 'Menunggu', confirmed: 'Dikonfirmasi', processing: 'Diproses',
-  shipped: 'Dikirim', delivered: 'Diterima', cancelled: 'Dibatalkan',
+  shipped: 'Dikirim', delivered: 'Diterima', completed: 'Selesai', cancelled: 'Dibatalkan',
+};
+const statusColors: Record<string, string> = {
+  pending: 'bg-yellow-100 text-yellow-700', confirmed: 'bg-blue-100 text-blue-700', processing: 'bg-purple-100 text-purple-700',
+  shipped: 'bg-indigo-100 text-indigo-700', delivered: 'bg-green-100 text-green-700', completed: 'bg-primary-100 text-primary-700',
+  cancelled: 'bg-red-100 text-red-700',
 };
 
 const steps = ['pending', 'confirmed', 'processing', 'shipped', 'delivered'];
@@ -49,14 +55,10 @@ const steps = ['pending', 'confirmed', 'processing', 'shipped', 'delivered'];
 export default function OrderDetailPage() {
   const router = useRouter();
   const params = useParams();
-  const { isAuthenticated, isLoading, user } = useAuthStore();
+  const { isLoading, isAuthenticated } = useAuthGuard();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(false);
-
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) router.push('/login');
-  }, [isLoading, isAuthenticated, router]);
 
   useEffect(() => {
     if (!isAuthenticated || !params.id) return;
@@ -83,8 +85,7 @@ export default function OrderDetailPage() {
     } finally { setCancelling(false) }
   };
 
-  const formatPrice = (price: number) =>
-    new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(price);
+  const formatPrice = (price: number) => rupiah(price);
 
   const formatDate = (date: string) =>
     new Date(date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });

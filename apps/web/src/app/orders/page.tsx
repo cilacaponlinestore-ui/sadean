@@ -7,6 +7,7 @@ import api from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
 import Navbar from '@/components/Navbar';
 import toast from 'react-hot-toast';
+import { tanggal } from '@/lib/format';
 
 interface Order {
   id: string;
@@ -23,20 +24,12 @@ interface Order {
 }
 
 const statusLabels: Record<string, string> = {
-  pending: 'Menunggu',
-  confirmed: 'Dikonfirmasi',
-  processing: 'Diproses',
-  shipped: 'Dikirim',
-  delivered: 'Diterima',
-  cancelled: 'Dibatalkan',
+  pending: 'Menunggu', confirmed: 'Dikonfirmasi', processing: 'Diproses',
+  shipped: 'Dikirim', delivered: 'Diterima', completed: 'Selesai', cancelled: 'Dibatalkan',
 };
-
 const statusColors: Record<string, string> = {
-  pending: 'bg-yellow-100 text-yellow-700',
-  confirmed: 'bg-blue-100 text-blue-700',
-  processing: 'bg-purple-100 text-purple-700',
-  shipped: 'bg-indigo-100 text-indigo-700',
-  delivered: 'bg-green-100 text-green-700',
+  pending: 'bg-yellow-100 text-yellow-700', confirmed: 'bg-blue-100 text-blue-700', processing: 'bg-purple-100 text-purple-700',
+  shipped: 'bg-indigo-100 text-indigo-700', delivered: 'bg-green-100 text-green-700', completed: 'bg-primary-100 text-primary-700',
   cancelled: 'bg-red-100 text-red-700',
 };
 
@@ -79,13 +72,7 @@ export default function OrdersPage() {
     }).format(price);
   };
 
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('id-ID', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    });
-  };
+  const formatDate = (date: string) => tanggal(date);
 
   if (isLoading || loading) {
     return (

@@ -5,14 +5,9 @@
       <stop offset="1" stop-color="#146B57"/>
     </linearGradient>
   </defs>
-  <!-- Background -->
   <rect width="140" height="140" rx="28" fill="url(#bg)"/>
-  
-  <!-- Ocean wave motif khas Cilacap -->
   <path d="M0 110 Q25 95 50 110 Q75 125 100 110 Q120 98 140 110V140H0V110Z" fill="#80D9B5" opacity="0.35"/>
   <path d="M0 118 Q30 104 60 118 Q90 132 120 118 Q130 112 140 118V140H0V118Z" fill="#80D9B5" opacity="0.5"/>
-  
-  <!-- Main letter S -->
   <path d="M58 48V90" stroke="white" stroke-width="8" stroke-linecap="round"/>
   <path d="M58 48C48 48 38 48 38 58C38 66 48 65 58 69C68 73 78 72 78 82C78 92 68 90 58 90" stroke="white" stroke-width="8" stroke-linecap="round" fill="none"/>
 </svg>

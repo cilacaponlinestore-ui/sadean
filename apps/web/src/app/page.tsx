@@ -20,7 +20,7 @@ export default async function Home() {
     <div className="min-h-screen bg-white">
       <Navbar />
 
-      {/* ── HERO ── */}
+      {/* HERO */}
       <section className="relative overflow-hidden bg-gradient-to-br from-[#0c1918] via-[#15312b] to-[#1b4538]">
         {heroBg && <div className="absolute inset-0 bg-cover bg-center opacity-15" style={{ backgroundImage: `url(${heroBg})` }} />}
         <div className="absolute right-0 top-0 h-[600px] w-[600px] translate-x-1/3 -translate-y-1/3 rounded-full bg-primary-500/10 blur-3xl" />
@@ -49,22 +49,31 @@ export default async function Home() {
             </div>
           </div>
 
-          {banners?.length ? (
+          {banners?.[0]?.imageUrl ? (
             <div className="relative mt-12 hidden lg:block lg:mt-0 lg:w-[480px]">
               <div className="overflow-hidden rounded-[2rem] border border-white/10 shadow-2xl">
                 <img src={banners[0].imageUrl} alt={banners[0].title} className="h-[420px] w-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-6">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-8">
                   <p className="font-black text-2xl text-white leading-tight">{banners[0].title}</p>
-                  {banners[0].subtitle && <p className="mt-1 text-sm text-white/70">{banners[0].subtitle}</p>}
+                  {banners[0].subtitle && <p className="mt-2 text-sm text-white/70">{banners[0].subtitle}</p>}
                 </div>
               </div>
             </div>
-          ) : null}
+          ) : (
+            <div className="relative mt-12 hidden lg:block lg:mt-0 lg:w-[480px]">
+              <div className="flex h-[420px] items-center justify-center overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-primary-700/40 to-primary-900/60 shadow-2xl">
+                <div className="text-center px-8">
+                  <p className="text-5xl font-black text-white/20">S</p>
+                  <p className="mt-4 text-sm font-bold text-white/40">SADEAN Marketplace</p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
-      {/* ── KATEGORI ── */}
+      {/* KATEGORI */}
       {categories.length > 0 && (
         <section className="border-b border-black/5 bg-white">
           <div className="page-container py-10">
@@ -76,7 +85,7 @@ export default async function Home() {
         </section>
       )}
 
-      {/* ── PRODUK UNGGULAN ── */}
+      {/* PRODUK UNGGULAN */}
       <section className="page-container py-16 sm:py-24">
         <div className="mb-10 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div><p className="text-xs font-bold uppercase tracking-[0.2em] text-primary-700">Pilihan minggu ini</p><h2 className="mt-3 text-3xl font-black tracking-[-.02em] text-ink sm:text-4xl">Produk unggulan</h2><p className="mt-3 max-w-xl leading-7 text-gray-500">Dikurasi langsung dari toko-toko UMKM yang aktif di Cilacap.</p></div>
@@ -105,7 +114,7 @@ export default async function Home() {
         ) : <div className="rounded-2xl border border-dashed border-black/10 bg-canvas py-20 text-center text-gray-400"><p className="font-bold">Produk pilihan sedang dikurasi.</p></div>}
       </section>
 
-      {/* ── KENAPA SADEAN ── */}
+      {/* KENAPA SADEAN */}
       <section className="border-y border-black/5 bg-canvas py-16 sm:py-24">
         <div className="page-container">
           <div className="mx-auto max-w-xl text-center"><p className="text-xs font-bold uppercase tracking-[0.2em] text-primary-700">Kenapa belanja di sini</p><h2 className="mt-3 text-3xl font-black tracking-[-.02em] text-ink sm:text-4xl">Lebih dekat, lebih berarti.</h2></div>
@@ -121,7 +130,7 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ── TOKO LOKAL ── */}
+      {/* TOKO LOKAL */}
       {sellerList.length > 0 && (
         <section className="page-container py-16 sm:py-24">
           <div className="mb-10 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -146,7 +155,7 @@ export default async function Home() {
         </section>
       )}
 
-      {/* ── CTA ── */}
+      {/* CTA */}
       <section className="page-container pb-16 sm:pb-24">
         <div className="overflow-hidden rounded-[2.5rem] bg-ink px-6 py-12 sm:px-12 sm:py-20 lg:flex lg:items-center lg:justify-between lg:px-16">
           <div>
@@ -161,7 +170,7 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ── FOOTER ── */}
+      {/* FOOTER */}
       <footer className="border-t border-black/5 bg-white py-10">
         <div className="page-container flex flex-col gap-4 text-sm text-gray-400 sm:flex-row sm:items-center sm:justify-between">
           <p><strong className="text-ink font-extrabold">SADEAN</strong> <span className="text-gray-300">·</span> Dodolane Wong Cilacap</p>

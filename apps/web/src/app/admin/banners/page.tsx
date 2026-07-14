@@ -107,7 +107,7 @@ export default function AdminBannersPage() {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Kelola Banner</h1>
+        <h1 className="text-2xl font-black tracking-tight text-ink">Kelola Banner</h1>
         <button
           onClick={() => {
             setShowForm(!showForm);
@@ -115,7 +115,7 @@ export default function AdminBannersPage() {
             setFormData(emptyForm);
             setUploadedImage([]);
           }}
-          className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+          className="focus-ring rounded-xl bg-primary-700 px-5 py-2.5 text-sm font-bold text-white hover:bg-primary-800"
         >
           {showForm ? 'Batal' : '+ Tambah Banner'}
         </button>
@@ -123,34 +123,34 @@ export default function AdminBannersPage() {
 
       {/* Form */}
       {showForm && (
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-6 mb-6">
+        <form onSubmit={handleSubmit} className="surface p-5 sm:p-6 mb-6">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Judul</label>
+              <label className="text-sm font-bold text-gray-700 mb-1 block">Judul</label>
               <input
                 type="text"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg"
+                className="focus-ring h-12 w-full rounded-xl border border-black/10 bg-white px-4 outline-none"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">URL Link</label>
+              <label className="text-sm font-bold text-gray-700 mb-1 block">URL Link</label>
               <input
                 type="text"
                 value={formData.link}
                 onChange={(e) => setFormData({ ...formData, link: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg"
+                className="focus-ring h-12 w-full rounded-xl border border-black/10 bg-white px-4 outline-none"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Urutan</label>
+              <label className="text-sm font-bold text-gray-700 mb-1 block">Urutan</label>
               <input
                 type="number"
                 value={formData.sortOrder}
                 onChange={(e) => setFormData({ ...formData, sortOrder: Number(e.target.value) })}
-                className="w-full px-3 py-2 border rounded-lg"
+                className="focus-ring h-12 w-full rounded-xl border border-black/10 bg-white px-4 outline-none"
                 min="0"
               />
             </div>
@@ -165,7 +165,7 @@ export default function AdminBannersPage() {
           </div>
           <button
             type="submit"
-            className="mt-4 px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+            className="focus-ring mt-4 h-12 rounded-xl bg-primary-700 px-6 font-bold text-white hover:bg-primary-800"
           >
             {editingId ? 'Perbarui' : 'Simpan'}
           </button>
@@ -175,53 +175,52 @@ export default function AdminBannersPage() {
       {/* Banner List */}
       <div className="space-y-4">
         {banners.map((banner) => (
-          <div key={banner.id} className="bg-white rounded-lg shadow p-4">
-            <div className="flex items-center gap-4">
-              <div className="w-32 h-20 bg-gray-100 rounded-lg overflow-hidden">
-                {banner.imageUrl && (
-                  <img
-                    src={banner.imageUrl}
-                    alt={banner.title}
-                    className="w-full h-full object-cover"
-                  />
-                )}
-              </div>
-              <div className="flex-1">
-                <h3 className="font-medium">{banner.title}</h3>
-                {banner.link && <p className="text-sm text-gray-500">{banner.link}</p>}
-                <p className="text-xs text-gray-400">Urutan: {banner.sortOrder}</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => handleToggleActive(banner)}
-                  className={`px-3 py-1 text-sm rounded ${
-                    banner.isActive
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-gray-100 text-gray-700'
-                  }`}
-                >
-                  {banner.isActive ? 'Aktif' : 'Nonaktif'}
-                </button>
-                <button
-                  onClick={() => handleEdit(banner)}
-                  className="px-3 py-1 text-sm text-primary-600 hover:bg-primary-50 rounded"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDelete(banner.id)}
-                  className="px-3 py-1 text-sm text-red-600 hover:bg-red-50 rounded"
-                >
-                  Hapus
-                </button>
-              </div>
+          <div key={banner.id} className="surface flex items-center gap-4 p-4">
+            <div className="h-20 w-32 shrink-0 overflow-hidden rounded-xl bg-[#eee9df]">
+              {banner.imageUrl && (
+                <img
+                  src={banner.imageUrl}
+                  alt={banner.title}
+                  className="h-full w-full object-cover"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                />
+              )}
+            </div>
+            <div className="min-w-0 flex-1">
+              <h3 className="font-extrabold text-ink">{banner.title}</h3>
+              {banner.link && <p className="mt-0.5 truncate text-sm text-gray-500">{banner.link}</p>}
+              <p className="mt-0.5 text-xs text-gray-400">Urutan: {banner.sortOrder}</p>
+            </div>
+            <div className="flex shrink-0 items-center gap-2">
+              <button
+                onClick={() => handleToggleActive(banner)}
+                className={`focus-ring rounded-full px-3 py-1 text-xs font-bold ${
+                  banner.isActive
+                    ? 'bg-green-100 text-green-700'
+                    : 'bg-gray-100 text-gray-700'
+                }`}
+              >
+                {banner.isActive ? 'Aktif' : 'Nonaktif'}
+              </button>
+              <button
+                onClick={() => handleEdit(banner)}
+                className="focus-ring rounded-xl px-3 py-1.5 text-sm font-bold text-primary-700 hover:bg-primary-50"
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => handleDelete(banner.id)}
+                className="focus-ring rounded-xl px-3 py-1.5 text-sm font-bold text-red-600 hover:bg-red-50"
+              >
+                Hapus
+              </button>
             </div>
           </div>
         ))}
 
         {banners.length === 0 && (
-          <div className="bg-white rounded-lg shadow p-8 text-center">
-            <p className="text-gray-500">Belum ada banner</p>
+          <div className="surface py-14 text-center">
+            <p className="font-extrabold text-ink">Belum ada banner</p>
           </div>
         )}
       </div>

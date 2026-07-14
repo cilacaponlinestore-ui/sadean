@@ -2,106 +2,37 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import api from '@/lib/api';
 import { favoritesApi } from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
 import Navbar from '@/components/Navbar';
 import toast from 'react-hot-toast';
 
 interface FavoriteItem {
-  id: string;
-  productId: string;
-  product: {
-    id: string;
-    name: string;
-    slug: string;
-    price: number;
-    stock: number;
-    image: string | null;
-    seller: { id: string; storeName: string; slug: string };
-  };
+  id: string; productId: string;
+  product: { id: string; name: string; slug: string; price: number; stock: number; image: string | null; seller: { id: string; storeName: string; slug: string } };
 }
+
+const rupiah = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 });
 
 export default function FavoritesPage() {
   const { user } = useAuthStore();
   const [items, setItems] = useState<FavoriteItem[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (user) load()
-    else { setLoading(false) }
-  }, [user]);
+  useEffect(() => { if (user) load(); else setLoading(false) }, [user]);
+  const load = async () => { try { setLoading(true); const r = await favoritesApi.list(); setItems(r.data); } catch { toast.error('Gagal memuat favorit'); } finally { setLoading(false); } };
+  const remove = async (productId: string) => { try { await favoritesApi.toggle(productId); setItems((p) => p.filter((i) => i.productId !== productId)); toast.success('Dihapus dari favorit'); } catch { toast.error('Gagal menghapus'); } };
 
-  const load = async () => {
-    try {
-      const r = await favoritesApi.list()
-      setItems(r.data)
-    } catch { toast.error('Gagal memuat favorit') }
-    finally { setLoading(false) }
-  };
-
-  const handleRemove = async (productId: string) => {
-    try {
-      await favoritesApi.toggle(productId)
-      setItems((prev) => prev.filter((i) => i.productId !== productId))
-      toast.success('Dihapus dari favorit')
-    } catch { toast.error('Gagal menghapus') }
-  };
-
-  const formatPrice = (price: number) =>
-    new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(price);
-
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      <main className="max-w-4xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Favorit Saya</h1>
-
-        {loading ? (
-          <div className="text-center py-12 text-gray-500">Memuat...</div>
-        ) : !user ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500 mb-4">Silakan login untuk melihat favorit</p>
-            <Link href="/login" className="text-primary-600 hover:underline">Login</Link>
-          </div>
-        ) : items.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500 mb-4">Belum ada produk favorit</p>
-            <Link href="/products" className="text-primary-600 hover:underline">Jelajahi Produk</Link>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {items.map((item) => (
-              <div key={item.id} className="bg-white rounded-lg shadow overflow-hidden relative group">
-                <Link href={`/products/${item.product.slug}`}>
-                  <div className="aspect-square bg-gray-100">
-                    {item.product.image ? (
-                      <img src={item.product.image} alt={item.product.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center"><span className="text-4xl">📦</span></div>
-                    )}
-                  </div>
-                </Link>
-                <button onClick={() => handleRemove(item.productId)}
-                  className="absolute top-2 right-2 p-2 bg-white rounded-full shadow hover:bg-red-50 transition opacity-0 group-hover:opacity-100">
-                  <svg className="w-5 h-5 text-red-500" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth={2}>
-                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                  </svg>
-                </button>
-                <div className="p-4">
-                  <Link href={`/products/${item.product.slug}`}>
-                    <h3 className="font-medium text-gray-900 line-clamp-2 mb-1 hover:text-primary-600">{item.product.name}</h3>
-                  </Link>
-                  <p className="text-lg font-bold text-primary-600 mb-1">{formatPrice(item.product.price)}</p>
-                  <Link href={`/sellers/${item.product.seller.slug}`} className="text-sm text-gray-500 hover:text-primary-600">
-                    {item.product.seller.storeName}
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </main>
-    </div>
-  );
+  return <div className="min-h-screen bg-canvas"><Navbar />
+    <main id="main-content" className="page-container py-8 sm:py-12">
+      <p className="eyebrow">Koleksi pribadi</p><h1 className="mt-2 text-3xl font-black tracking-tight text-ink">Favorit Saya</h1>
+      {loading ? <div className="mt-10 text-center font-bold text-gray-500">Memuat favorit...</div> : !user ? <div className="surface mt-10 py-16 text-center"><p className="font-extrabold text-ink">Silakan login</p><p className="mt-2 text-gray-500">Favorit tersimpan setelah masuk.</p><Link href="/login" className="focus-ring mt-5 inline-flex h-12 items-center rounded-xl bg-primary-700 px-6 font-bold text-white hover:bg-primary-800">Masuk ke SADEAN</Link></div>
+      : !items.length ? <div className="surface mt-10 py-16 text-center"><p className="font-extrabold text-ink">Belum ada favorit</p><p className="mt-2 text-gray-500">Simpan produk yang kamu suka saat belanja.</p><Link href="/products" className="focus-ring mt-5 inline-flex h-12 items-center rounded-xl bg-primary-700 px-6 font-bold text-white hover:bg-primary-800">Jelajahi Produk</Link></div>
+      : <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">{items.map((item) => <div key={item.id} className="group relative overflow-hidden rounded-2xl border border-black/5 bg-white transition hover:-translate-y-1 hover:shadow-soft">
+        <Link href={`/products/${item.product.slug}`} className="focus-ring block"><div className="aspect-square overflow-hidden bg-[#eee9df]">{item.product.image ? <img src={item.product.image} alt={item.product.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} /> : <div className="flex h-full items-center justify-center text-4xl opacity-30">📦</div>}</div></Link>
+        <button aria-label="Hapus dari favorit" onClick={() => remove(item.productId)} className="focus-ring absolute right-2 top-2 z-10 rounded-full bg-white/95 p-2 shadow-sm opacity-100 transition hover:bg-red-50 md:opacity-0 md:group-hover:opacity-100"><svg className="h-5 w-5 text-red-500" viewBox="0 0 24 24" fill="currentColor"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></svg></button>
+        <div className="p-3.5 sm:p-4"><p className="text-[11px] font-bold uppercase tracking-wider text-primary-700">{item.product.seller.storeName}</p><Link href={`/products/${item.product.slug}`} className="focus-ring block"><h3 className="mt-1 line-clamp-2 min-h-10 font-extrabold leading-5 text-ink">{item.product.name}</h3></Link><p className="mt-3 text-lg font-black text-primary-700">{rupiah.format(Number(item.product.price))}</p></div>
+      </div>)}</div>}
+    </main>
+  </div>;
 }

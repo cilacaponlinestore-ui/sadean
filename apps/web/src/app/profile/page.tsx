@@ -2,227 +2,53 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useAuthStore } from '@/lib/store';
 import { usersApi } from '@/lib/api';
 import toast from 'react-hot-toast';
 import ImageUploader from '@/components/ImageUploader';
 import type { ImageItem } from '@/components/ImageUploader';
 
+const inputCls = 'focus-ring mt-2 h-12 w-full rounded-xl border border-black/10 bg-white px-4 outline-none';
+const labelCls = 'text-sm font-bold text-gray-700';
+
 export default function ProfilePage() {
   const router = useRouter();
   const { user, isAuthenticated, isLoading, loadUser } = useAuthStore();
   const [editing, setEditing] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
-  });
+  const [form, setForm] = useState({ name: '', phone: '' });
   const [saving, setSaving] = useState(false);
-  const [uploadedAvatar, setUploadedAvatar] = useState<ImageItem[]>([]);
+  const [avatar, setAvatar] = useState<ImageItem[]>([]);
 
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.push('/login');
-    }
-  }, [isLoading, isAuthenticated, router]);
+  useEffect(() => { if (!isLoading && !isAuthenticated) router.push('/login'); }, [isLoading, isAuthenticated, router]);
+  useEffect(() => { if (user) setForm({ name: user.name || '', phone: user.phone || '' }); }, [user]);
 
-  useEffect(() => {
-    if (user) {
-      setFormData({
-        name: user.name || '',
-        phone: user.phone || '',
-      });
-    }
-  }, [user]);
+  const submit = async (e: React.FormEvent) => { e.preventDefault(); setSaving(true); try { const payload: any = { ...form }; if (avatar.length > 0) payload.avatar = avatar[0].url; await usersApi.updateProfile(payload); await loadUser(); setEditing(false); setAvatar([]); toast.success('Profil diperbarui'); } catch { toast.error('Gagal memperbarui profil'); } finally { setSaving(false); } };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
+  if (isLoading || !user) return <div className="flex min-h-screen items-center justify-center bg-canvas"><div className="h-10 w-10 animate-spin rounded-full border-2 border-primary-200 border-t-primary-700" /></div>;
 
-    try {
-      const payload: any = { ...formData };
-      if (uploadedAvatar.length > 0) {
-        payload.avatar = uploadedAvatar[0].url;
-      }
-      await usersApi.updateProfile(payload);
-      await loadUser();
-      setEditing(false);
-      setUploadedAvatar([]);
-      toast.success('Profil berhasil diperbarui');
-    } catch (error) {
-      toast.error('Gagal memperbarui profil');
-    } finally {
-      setSaving(false);
-    }
-  };
+  const roleLabel: Record<string, string> = { buyer: 'Pembeli', seller: 'Penjual', admin: 'Admin' };
 
-  if (isLoading || !user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+  return <div className="min-h-screen bg-canvas">
+    <header className="sticky top-0 z-40 border-b border-black/5 bg-canvas/90 backdrop-blur-xl"><div className="page-container flex h-16 items-center justify-between"><Link href={user.role === 'buyer' ? '/' : '/dashboard'} className="focus-ring inline-flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-primary-700">← Kembali</Link><h1 className="text-lg font-black tracking-tight text-ink">Profil Saya</h1><div className="w-16" /></div></header>
+    <main className="page-container max-w-2xl py-8 sm:py-12">
+      <div className="surface p-5 sm:p-8">
+        <div className="flex items-center gap-5 border-b border-black/5 pb-6">
+          <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-primary-100 text-2xl font-black text-primary-800">{user.avatar ? <img src={user.avatar} alt={user.name} className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} /> : user.name.charAt(0).toUpperCase()}</div>
+          <div className="min-w-0"><h2 className="truncate text-xl font-extrabold text-ink">{user.name}</h2><p className="truncate text-sm text-gray-500">{user.email}</p><span className="mt-1.5 inline-block rounded-full bg-primary-100 px-3 py-1 text-xs font-bold text-primary-800">{roleLabel[user.role] || user.role}</span></div>
+        </div>
+
+        {editing ? <form onSubmit={submit} className="mt-7 space-y-6">
+          <ImageUploader images={avatar} onChange={setAvatar} maxImages={1} folder="avatars" />
+          <div><label className={labelCls}>Nama Lengkap</label><input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className={inputCls} required /></div>
+          <div><label className={labelCls}>Email</label><input value={user.email} disabled className={`${inputCls} bg-canvas text-gray-400`} /><p className="mt-1 text-xs text-gray-400">Email tidak dapat diubah</p></div>
+          <div><label className={labelCls}>Nomor HP</label><input type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className={inputCls} placeholder="0812..." /></div>
+          <div className="flex gap-3"><button disabled={saving} className="focus-ring h-12 rounded-xl bg-primary-700 px-6 font-bold text-white hover:bg-primary-800 disabled:opacity-50">{saving ? 'Menyimpan...' : 'Simpan'}</button><button type="button" onClick={() => { setEditing(false); setAvatar([]); setForm({ name: user.name || '', phone: user.phone || '' }); }} className="focus-ring h-12 rounded-xl border border-black/10 bg-white px-6 font-bold hover:bg-canvas">Batal</button></div>
+        </form> : <div className="mt-7 space-y-5">
+          {[{ label: 'Nama Lengkap', value: user.name }, { label: 'Email', value: user.email }, { label: 'Nomor HP', value: user.phone || '-' }].map((f) => <div key={f.label}><p className="text-xs font-bold uppercase tracking-wider text-gray-400">{f.label}</p><p className="mt-1 font-bold text-ink">{f.value}</p></div>)}
+          <button onClick={() => { setEditing(true); if (user.avatar) setAvatar([{ url: user.avatar, isPrimary: true }]); }} className="focus-ring mt-4 h-12 rounded-xl bg-primary-700 px-6 font-bold text-white hover:bg-primary-800">Edit Profil</button>
+        </div>}
       </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-primary-600">Profil Saya</h1>
-            <button
-              onClick={() => router.back()}
-              className="text-gray-500 hover:text-gray-700"
-            >
-              ← Kembali
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-lg shadow p-6">
-          {/* Avatar Section */}
-          <div className="flex items-center gap-6 mb-8 pb-6 border-b">
-            <div className="w-20 h-20 rounded-full bg-primary-100 flex items-center justify-center">
-              {user.avatar ? (
-                <img
-                  src={user.avatar}
-                  alt={user.name}
-                  className="w-full h-full rounded-full object-cover"
-                />
-              ) : (
-                <span className="text-3xl text-primary-600">
-                  {user.name.charAt(0).toUpperCase()}
-                </span>
-              )}
-            </div>
-            <div>
-              <h2 className="text-xl font-semibold">{user.name}</h2>
-              <p className="text-gray-500">{user.email}</p>
-              <span className="inline-block mt-1 px-2 py-1 text-xs font-medium bg-primary-100 text-primary-700 rounded">
-                {user.role === 'seller' ? 'Penjual' : user.role === 'admin' ? 'Admin' : 'Pembeli'}
-              </span>
-            </div>
-          </div>
-
-          {/* Profile Form */}
-          {editing ? (
-            <form onSubmit={handleSubmit}>
-              <div className="space-y-4">
-                <div>
-                  <ImageUploader
-                    images={uploadedAvatar}
-                    onChange={setUploadedAvatar}
-                    maxImages={1}
-                    folder="avatars"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Nama Lengkap
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    value={user.email}
-                    disabled
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-500"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">Email tidak dapat diubah</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Nomor HP
-                  </label>
-                  <input
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    placeholder="081234567890"
-                  />
-                </div>
-              </div>
-              <div className="flex gap-4 mt-6">
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50"
-                >
-                  {saving ? 'Menyimpan...' : 'Simpan'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEditing(false);
-                    setUploadedAvatar([]);
-                    setFormData({
-                      name: user.name || '',
-                      phone: user.phone || '',
-                    });
-                  }}
-                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-                >
-                  Batal
-                </button>
-              </div>
-            </form>
-          ) : (
-            <div>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-500 mb-1">
-                    Nama Lengkap
-                  </label>
-                  <p className="text-gray-900">{user.name}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-500 mb-1">
-                    Email
-                  </label>
-                  <p className="text-gray-900">{user.email}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-500 mb-1">
-                    Nomor HP
-                  </label>
-                  <p className="text-gray-900">{user.phone || '-'}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-500 mb-1">
-                    Role
-                  </label>
-                  <p className="text-gray-900 capitalize">{user.role}</p>
-                </div>
-              </div>
-              <button
-                onClick={() => {
-                  setEditing(true);
-                  if (user.avatar) {
-                    setUploadedAvatar([{ url: user.avatar, isPrimary: true }]);
-                  }
-                }}
-                className="mt-6 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
-              >
-                Edit Profil
-              </button>
-            </div>
-          )}
-        </div>
-      </main>
-    </div>
-  );
+    </main>
+  </div>;
 }

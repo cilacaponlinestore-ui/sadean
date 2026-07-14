@@ -9,101 +9,27 @@ import toast from 'react-hot-toast';
 interface Category { id: string; name: string }
 interface ImageItem { url: string; isPrimary: boolean }
 
+const fi = 'focus-ring mt-2 h-12 w-full rounded-xl border border-black/10 bg-white px-4 outline-none';
+
 export default function NewProductPage() {
   const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '', description: '', price: '', stock: '', unit: 'pcs', categoryId: '',
-  });
+  const [form, setForm] = useState({ name: '', description: '', price: '', stock: '', unit: 'pcs', categoryId: '' });
   const [images, setImages] = useState<ImageItem[]>([]);
 
-  useEffect(() => { loadCategories() }, []);
+  useEffect(() => { api.get('/categories').then((r) => setCategories(r.data.data || r.data)).catch(() => toast.error('Gagal memuat kategori')); }, []);
 
-  const loadCategories = async () => {
-    try {
-      const r = await api.get('/categories');
-      setCategories(r.data.data || r.data);
-    } catch { toast.error('Gagal memuat kategori') }
-  };
+  const submit = async (e: React.FormEvent) => { e.preventDefault(); setLoading(true); try { const r = await api.post('/products', { ...form, price: parseInt(form.price), stock: parseInt(form.stock) }); for (const img of images) await api.post(`/products/${r.data.id}/images`, { imageUrl: img.url, isPrimary: img.isPrimary }); toast.success('Produk ditambahkan'); router.push('/seller/products'); } catch (e: any) { toast.error(e.response?.data?.message || 'Gagal menambahkan produk'); } finally { setLoading(false); } };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      const r = await api.post('/products', {
-        ...formData,
-        price: parseInt(formData.price),
-        stock: parseInt(formData.stock),
-      });
-      const productId = r.data.id;
-
-      for (const img of images) {
-        await api.post(`/products/${productId}/images`, {
-          imageUrl: img.url,
-          isPrimary: img.isPrimary,
-        });
-      }
-
-      toast.success('Produk berhasil ditambahkan');
-      router.push('/seller/products');
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Gagal menambahkan produk');
-    } finally { setLoading(false) }
-  };
-
-  return (
-    <div className="max-w-2xl">
-      <h1 className="text-2xl font-bold mb-6">Tambah Produk Baru</h1>
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-6 space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Nama Produk <span className="text-red-500">*</span></label>
-          <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" required />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-          <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" rows={4} />
-        </div>
-        <div className="grid grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Harga (Rp) <span className="text-red-500">*</span></label>
-            <input type="number" value={formData.price} onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" min="0" required />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Stok <span className="text-red-500">*</span></label>
-            <input type="number" value={formData.stock} onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" min="0" required />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Satuan</label>
-            <input type="text" value={formData.unit} onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" />
-          </div>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Kategori <span className="text-red-500">*</span></label>
-          <select value={formData.categoryId} onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500" required>
-            <option value="">Pilih Kategori</option>
-            {categories.map((cat) => (<option key={cat.id} value={cat.id}>{cat.name}</option>))}
-          </select>
-        </div>
-
-        <ImageUploader images={images} onChange={setImages} />
-
-        <div className="flex gap-4 pt-2">
-          <button type="submit" disabled={loading}
-            className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50">
-            {loading ? 'Menyimpan...' : 'Simpan Produk'}
-          </button>
-          <button type="button" onClick={() => router.back()}
-            className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Batal</button>
-        </div>
-      </form>
-    </div>
-  );
+  return <div className="max-w-2xl"><h1 className="text-2xl font-black tracking-tight text-ink mb-6">Tambah Produk Baru</h1>
+    <form onSubmit={submit} className="surface p-5 sm:p-6 space-y-5">
+      <div><label className="text-sm font-bold text-gray-700">Nama Produk <span className="text-red-500">*</span></label><input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className={fi} required /></div>
+      <div><label className="text-sm font-bold text-gray-700">Deskripsi</label><textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className={`${fi} py-3 min-h-[100px]`} rows={4} /></div>
+      <div className="grid grid-cols-3 gap-4"><div><label className="text-sm font-bold text-gray-700">Harga (Rp) <span className="text-red-500">*</span></label><input type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} className={fi} min="0" required /></div><div><label className="text-sm font-bold text-gray-700">Stok <span className="text-red-500">*</span></label><input type="number" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} className={fi} min="0" required /></div><div><label className="text-sm font-bold text-gray-700">Satuan</label><input value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })} className={fi} /></div></div>
+      <div><label className="text-sm font-bold text-gray-700">Kategori <span className="text-red-500">*</span></label><select value={form.categoryId} onChange={(e) => setForm({ ...form, categoryId: e.target.value })} className={fi} required><option value="">Pilih Kategori</option>{categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
+      <ImageUploader images={images} onChange={setImages} />
+      <div className="flex gap-3 pt-2"><button disabled={loading} className="focus-ring h-12 rounded-xl bg-primary-700 px-6 font-bold text-white hover:bg-primary-800 disabled:opacity-50">{loading ? 'Menyimpan...' : 'Simpan Produk'}</button><button type="button" onClick={() => router.back()} className="focus-ring h-12 rounded-xl border border-black/10 bg-white px-6 font-bold hover:bg-canvas">Batal</button></div>
+    </form>
+  </div>;
 }

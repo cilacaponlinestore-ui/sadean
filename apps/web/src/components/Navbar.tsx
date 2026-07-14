@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
@@ -8,10 +8,12 @@ import { useAuthStore } from '@/lib/store';
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, isAuthenticated, isLoading, logout } = useAuthStore();
+  const { user, isAuthenticated, isLoading, logout, loadUser } = useAuthStore();
   const [open, setOpen] = useState(false);
   const links = [{ href: '/products', label: 'Produk' }, { href: '/sellers', label: 'Toko Lokal' }];
   const active = (href: string) => pathname.startsWith(href);
+
+  useEffect(() => { loadUser(); }, [loadUser]);
 
   const handleLogout = async () => { await logout(); router.push('/login'); };
   return (

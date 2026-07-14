@@ -302,10 +302,10 @@ export class OrdersService {
       case 'completed':
         updateData.completedAt = new Date();
         break;
-      case 'cancelled': {
+      case 'cancelled':
         updateData.cancelledAt = new Date();
         break;
-      }
+    }
 
     return this.prisma.$transaction(async (tx) => {
       if (updateData.cancelledAt) {

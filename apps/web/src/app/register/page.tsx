@@ -15,7 +15,7 @@ export default function RegisterPage() {
   const [show, setShow] = useState(false);
   const [form, setForm] = useState({ name: '', email: '', phone: '', password: '', confirmPassword: '', role: 'buyer' });
   const mismatch = Boolean(form.confirmPassword && form.password !== form.confirmPassword);
-  const submit = async (event: React.FormEvent) => { event.preventDefault(); clearError(); if (mismatch) return; if (form.password.length < 8) { toast.error('Password minimal 8 karakter'); return; } setLoading(true); try { await register({ name: form.name, email: form.email, phone: form.phone || undefined, password: form.password, role: form.role }); toast.success('Akun berhasil dibuat'); router.push('/dashboard'); } catch {} finally { setLoading(false); } };
+  const submit = async (event: React.FormEvent) => { event.preventDefault(); clearError(); if (mismatch) return; if (form.password.length < 8) { toast.error('Password minimal 8 karakter'); return; } setLoading(true); try { await register({ name: form.name, email: form.email, phone: form.phone || undefined, password: form.password, role: form.role }); toast.success('Akun berhasil dibuat'); if (form.role === 'buyer') router.push('/'); else router.push('/dashboard'); } catch {} finally { setLoading(false); } };
 
   return <main className="min-h-screen overflow-hidden bg-canvas px-4 py-10 sm:py-14">
     <div className="pointer-events-none fixed -right-24 top-0 h-80 w-80 rounded-full bg-primary-200/50 blur-3xl"/><div className="pointer-events-none fixed -bottom-24 -left-24 h-80 w-80 rounded-full bg-clay-100 blur-3xl"/>

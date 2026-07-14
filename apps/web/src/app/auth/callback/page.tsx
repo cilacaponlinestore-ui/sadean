@@ -18,7 +18,7 @@ export default function AuthCallbackPage() {
         if (error || !data.session) throw error || new Error('Sesi Google tidak ditemukan');
         await completeGoogleLogin(data.session.access_token);
         await supabase.auth.signOut();
-        if (active) { toast.success('Selamat datang di SADEAN'); router.replace('/'); }
+        if (active) { toast.success('Selamat datang di SADEAN'); const role = useAuthStore.getState().user?.role; router.replace(role === 'buyer' || !role ? '/' : '/dashboard'); }
       } catch {
         await supabase.auth.signOut();
         if (active) { toast.error('Login Google gagal'); router.replace('/login'); }

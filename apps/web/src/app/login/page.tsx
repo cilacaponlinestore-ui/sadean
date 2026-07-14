@@ -15,7 +15,7 @@ export default function LoginPage() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
 
-  const submit = async (event: React.FormEvent) => { event.preventDefault(); clearError(); setPasswordLoading(true); try { await login(form.email, form.password); toast.success('Selamat datang kembali'); router.push('/dashboard'); } catch {} finally { setPasswordLoading(false); } };
+  const submit = async (event: React.FormEvent) => { event.preventDefault(); clearError(); setPasswordLoading(true); try { await login(form.email, form.password); toast.success('Selamat datang kembali'); if (useAuthStore.getState().user?.role === 'buyer') router.push('/'); else router.push('/dashboard'); } catch {} finally { setPasswordLoading(false); } };
   const google = async () => {
     setGoogleLoading(true);
     const { error: oauthError } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: `${window.location.origin}/auth/callback` } });

@@ -52,7 +52,7 @@ export default async function Home() {
           {banners?.[0]?.imageUrl ? (
             <div className="relative mt-12 hidden lg:block lg:mt-0 lg:w-[480px]">
               <div className="overflow-hidden rounded-[2rem] border border-white/10 shadow-2xl">
-                <img src={banners[0].imageUrl} alt={banners[0].title} className="h-[420px] w-full object-cover" />
+                <img src={banners[0].imageUrl} alt="" className="h-[420px] w-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-8">
                   <p className="font-black text-2xl text-white leading-tight">{banners[0].title}</p>

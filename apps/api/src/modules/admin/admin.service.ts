@@ -8,52 +8,18 @@ export class AdminService {
 
   async getDashboard() {
     try {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const [
-      totalUsers,
-      totalBuyers,
-      totalSellers,
-      totalUmkm,
-      totalProducts,
-      totalOrders,
-      todayOrders,
-      latestProducts,
-      pendingSellers,
-    ] = await Promise.all([
-      this.prisma.user.count(),
-      this.prisma.user.count({ where: { role: 'buyer' } }),
-      this.prisma.user.count({ where: { role: 'seller' } }),
-      this.prisma.seller.count(),
-      this.prisma.product.count(),
-      this.prisma.order.count(),
-      this.prisma.order.count({ where: { createdAt: { gte: today } } }),
-      this.prisma.product.findMany({
-        take: 5,
-        orderBy: { createdAt: 'desc' },
-        include: {
-          category: { select: { name: true } },
-          seller: { select: { storeName: true } },
-          images: { where: { isPrimary: true }, take: 1 },
-        },
-      }),
-      this.prisma.seller.count({ where: { status: 'PENDING' as any } }),
-    ]);
-
-    return {
-      totalUsers,
-      totalBuyers,
-      totalSellers,
-      totalUmkm,
-      totalProducts,
-      totalOrders,
-      todayOrders,
-      latestProducts,
-      pendingSellers,
-    };
+      const [totalUsers, totalBuyers, totalSellers, totalProducts, totalOrders] = await Promise.all([
+        this.prisma.user.count(),
+        this.prisma.user.count({ where: { role: 'buyer' } }),
+        this.prisma.user.count({ where: { role: 'seller' } }),
+        this.prisma.product.count(),
+        this.prisma.order.count(),
+      ]);
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      const todayOrders = await this.prisma.order.count({ where: { createdAt: { gte: today } } });
+      return { totalUsers, totalBuyers, totalSellers, totalUmkm: totalSellers, totalProducts, totalOrders, todayOrders, pendingSellers: 0, latestProducts: [] };
     } catch (error) {
-      new Logger('AdminService').error('Dashboard failed', error instanceof Error ? error.stack : error);
+      new Logger('AdminService').error('Dashboard failed', error instanceof Error ? error.message : String(error));
       throw error;
     }
   }

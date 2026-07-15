@@ -10,7 +10,7 @@ export function middleware(request: NextRequest) {
 
   const isPublic = pathname === '/' || publicRoutes.some((route) => pathname.startsWith(route))
   const isAuthPage = authPages.some((route) => pathname === route)
-  const isStatic = pathname.startsWith('/_next') || pathname.startsWith('/icons') || pathname.startsWith('/manifest') || pathname === '/sw.js' || pathname === '/favicon.ico' || pathname === '/offline' || pathname === '/icon.svg' || pathname === '/logo.png'
+  const isStatic = pathname.startsWith('/_next') || pathname.startsWith('/icons') || pathname.startsWith('/manifest') || pathname === '/sw.js' || pathname === '/favicon.ico' || pathname === '/offline' || pathname.endsWith('.svg') || pathname.endsWith('.png')
 
   if (isStatic) return NextResponse.next()
 

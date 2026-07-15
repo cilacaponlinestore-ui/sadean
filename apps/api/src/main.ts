@@ -6,6 +6,23 @@ import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
+import { PrismaClient } from '@prisma/client';
+
+async function seedSuperAdmin() {
+  const prisma = new PrismaClient();
+  try {
+    const sa = await prisma.user.findUnique({ where: { email: 'daniadhisaputro@gmail.com' } });
+    if (sa && sa.role !== 'super_admin') {
+      await prisma.user.update({ where: { email: 'daniadhisaputro@gmail.com' }, data: { role: 'super_admin' } });
+      console.log('Seeded super_admin: daniadhisaputro@gmail.com');
+    }
+  } catch (e) {
+    console.warn('super_admin seed skipped:', (e as Error).message);
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
@@ -52,6 +69,8 @@ async function bootstrap() {
   
   console.log(`🚀 Application is running on: http://localhost:${port}`);
   console.log(`📚 Swagger docs: http://localhost:${port}/api/docs`);
+
+  seedSuperAdmin();
 }
 
 bootstrap();

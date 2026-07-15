@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
+import Image from 'next/image';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
 const rp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 });
@@ -52,7 +53,7 @@ export default async function Home() {
           {banners?.[0]?.imageUrl ? (
             <div className="relative mt-12 hidden lg:block lg:mt-0 lg:w-[480px]">
               <div className="overflow-hidden rounded-[2rem] border border-white/10 shadow-2xl">
-                <img src={banners[0].imageUrl} alt="" className="h-[420px] w-full object-cover" />
+                <Image src={banners[0].imageUrl} alt="" className="h-[420px] w-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-8">
                   <p className="font-black text-2xl text-white leading-tight">{banners[0].title}</p>
@@ -98,7 +99,7 @@ export default async function Home() {
               return (
                 <Link key={p.id} href={`/products/${p.slug}`} className="group relative overflow-hidden rounded-2xl border border-black/5 bg-white transition hover:-translate-y-1 hover:shadow-2xl focus-ring">
                   <div className="aspect-square overflow-hidden bg-[#eee9df]">
-                    {img ? <img src={img} alt={p.name} className="h-full w-full object-cover transition duration-700 group-hover:scale-105" /> : <div className="flex h-full items-center justify-center text-4xl opacity-30">📦</div>}
+                    {img ? <Image src={img} alt={p.name} className="h-full w-full object-cover transition duration-700 group-hover:scale-105" /> : <div className="flex h-full items-center justify-center text-4xl opacity-30">📦</div>}
                     {p.stock > 0 && <span className="absolute left-3 top-3 rounded-full bg-white/95 px-3 py-1 text-[11px] font-bold text-primary-800 shadow-sm">Stok {p.stock}</span>}
                   </div>
                   <div className="p-4">
@@ -141,7 +142,7 @@ export default async function Home() {
             {sellerList.map((s: any) => (
               <Link key={s.id} href={`/sellers/${s.slug}`} className="group overflow-hidden rounded-2xl border border-black/5 bg-white transition hover:-translate-y-1 hover:shadow-soft focus-ring">
                 <div className="flex items-start gap-5 p-5">
-                  <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-primary-100 text-lg font-black text-primary-800">{s.logo ? <img src={s.logo} alt={s.storeName} className="h-full w-full object-cover" /> : s.storeName.charAt(0)}</div>
+                  <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-primary-100 text-lg font-black text-primary-800">{s.logo ? <Image src={s.logo} alt={s.storeName} className="h-full w-full object-cover" /> : s.storeName.charAt(0)}</div>
                   <div className="min-w-0 flex-1">
                     <h3 className="truncate font-extrabold text-ink">{s.storeName}</h3>
                     {s.address && <p className="mt-1 truncate text-xs text-gray-500">{s.address}</p>}

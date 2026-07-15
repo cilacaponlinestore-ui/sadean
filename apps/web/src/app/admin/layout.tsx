@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
+import Image from 'next/image';
 
 const adminLinks = [
   { href: '/dashboard', label: 'Dashboard', icon: '📊' },
@@ -49,7 +50,7 @@ export default function AdminLayout({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
-              <Link href="/" className="flex items-center gap-3"><img src="/logo.png" alt="SADEAN" className="h-9 w-9 rounded-xl object-cover"/><span className="text-xl font-black text-primary-600">SADEAN</span></Link>
+              <Link href="/" className="flex items-center gap-3"><Image src="/logo.png" alt="SADEAN" className="h-9 w-9 rounded-xl object-cover"/><span className="text-xl font-black text-primary-600">SADEAN</span></Link>
               <span className="px-2 py-1 text-xs font-medium bg-red-100 text-red-700 rounded">
                 Admin
               </span>

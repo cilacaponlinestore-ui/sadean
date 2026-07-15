@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
+import Image from 'next/image';
 
 interface Seller { id: string; storeName: string; slug: string; phone: string; logo?: string; status: 'PENDING' | 'VERIFIED' | 'REJECTED' | 'SUSPENDED'; createdAt: string; _count: { products: number }; }
 
@@ -35,7 +36,7 @@ export default function AdminSellersPage() {
     {filtered.length === 0 ? <div className="surface p-8 text-center text-gray-500">Belum ada data</div> : (
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {filtered.map((s) => <div key={s.id} className="surface p-5">
-          <div className="mb-4 flex items-start gap-4"><div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-primary-100 text-lg font-black text-primary-800">{s.logo ? <img src={s.logo} alt="" className="h-full w-full object-cover" /> : s.storeName[0]}</div><div className="min-w-0 flex-1"><p className="font-extrabold text-ink truncate">{s.storeName}</p><span className={`mt-1 inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold ${statusColor[s.status]}`}>{statusLabel[s.status]}</span></div></div>
+          <div className="mb-4 flex items-start gap-4"><div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-primary-100 text-lg font-black text-primary-800">{s.logo ? <Image src={s.logo} alt="" className="h-full w-full object-cover" /> : s.storeName[0]}</div><div className="min-w-0 flex-1"><p className="font-extrabold text-ink truncate">{s.storeName}</p><span className={`mt-1 inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold ${statusColor[s.status]}`}>{statusLabel[s.status]}</span></div></div>
           <div className="mb-4 flex gap-4 text-sm"><span className="text-gray-500">{s._count?.products || 0} produk</span><span className="text-gray-400">{new Date(s.createdAt).toLocaleDateString('id-ID')}</span></div>
         </div>)}
       </div>

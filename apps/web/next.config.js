@@ -5,11 +5,9 @@ const nextConfig = {
   swcMinify: true,
   eslint: { ignoreDuringBuilds: true },
   images: {
+    unoptimized: true,
     remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '*.supabase.co',
-      },
+      { protocol: 'https', hostname: '*.supabase.co' },
     ],
   },
   async headers() {

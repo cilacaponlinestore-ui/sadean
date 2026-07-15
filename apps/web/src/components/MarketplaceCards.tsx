@@ -1,11 +1,12 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 export function ProductCard({ product }: { product: any }) {
   const image = product.images?.[0]?.imageUrl;
   return (
     <Link href={`/products/${product.slug}`} className="group overflow-hidden rounded-2xl border border-black/5 bg-white transition hover:-translate-y-1 hover:shadow-soft focus-ring">
       <div className="relative aspect-square overflow-hidden bg-[#eee9df]">
-        {image ? <img src={image} alt={product.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" /> : (
+        {image ? <Image src={image} alt={product.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" /> : (
           <div className="flex h-full items-center justify-center text-primary-700"><span className="rounded-full bg-white/70 px-4 py-2 text-xs font-bold">Produk lokal</span></div>
         )}
         {product.stock > 0 && <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-bold text-primary-800">Stok {product.stock}</span>}
@@ -25,7 +26,7 @@ export function SellerCard({ seller }: { seller: any }) {
     <Link href={`/sellers/${seller.slug}`} className="group rounded-2xl border border-black/5 bg-white p-5 transition hover:-translate-y-1 hover:shadow-soft focus-ring">
       <div className="flex items-start gap-4">
         <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-primary-100 text-xl font-extrabold text-primary-800">
-          {seller.logo ? <img src={seller.logo} alt={seller.storeName} className="h-full w-full object-cover" /> : seller.storeName.charAt(0)}
+          {seller.logo ? <Image src={seller.logo} alt={seller.storeName} className="h-full w-full object-cover" /> : seller.storeName.charAt(0)}
         </div>
         <div className="min-w-0">
           <div className="flex items-center gap-2"><h3 className="truncate font-extrabold text-ink">{seller.storeName}</h3>{seller.isVerified && <span title="Terverifikasi" className="text-primary-600">✓</span>}</div>

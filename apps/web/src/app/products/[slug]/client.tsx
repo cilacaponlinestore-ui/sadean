@@ -8,6 +8,7 @@ import { useAuthStore } from '@/lib/store';
 import Navbar from '@/components/Navbar';
 import toast from 'react-hot-toast';
 import { rupiah } from '@/lib/format';
+import Image from 'next/image';
 
 interface Product {
   id: string;
@@ -95,7 +96,7 @@ export function ProductDetailClient({ product }: { product: Product | null }) {
               <div className="relative aspect-square overflow-hidden rounded-[2rem] bg-[#eee9df] group">
                   {product.images.length > 0 ? (
                     <>
-                      <img src={product.images[selectedImage]?.imageUrl} alt={product.name}
+                      <Image src={product.images[selectedImage]?.imageUrl} alt={product.name}
                         className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                     {product.images.length > 1 && (
                       <>
@@ -129,7 +130,7 @@ export function ProductDetailClient({ product }: { product: Product | null }) {
                   {product.images.map((img, i) => (
                     <button key={img.id || i} onClick={() => setSelectedImage(i)}
                       className={`w-16 h-16 shrink-0 rounded-lg overflow-hidden border-2 transition ${i === selectedImage ? 'border-primary-500' : 'border-transparent hover:border-gray-300'}`}>
-                      <img src={img.imageUrl} alt="" className="w-full h-full object-cover" />
+                      <Image src={img.imageUrl} alt="" className="w-full h-full object-cover" />
                     </button>
                   ))}
                 </div>

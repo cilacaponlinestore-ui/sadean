@@ -7,6 +7,7 @@ import { sellersApi } from '@/lib/api';
 import toast from 'react-hot-toast';
 import ImageUploader from '@/components/ImageUploader';
 import type { ImageItem } from '@/components/ImageUploader';
+import Image from 'next/image';
 
 const fi = 'focus-ring mt-2 h-12 w-full rounded-xl border border-black/10 bg-white px-4 outline-none';
 
@@ -37,7 +38,7 @@ export default function SellerStorePage() {
     <div className="mb-6"><p className="eyebrow">Profil Toko</p><h1 className="mt-2 text-2xl font-black tracking-tight text-ink">Pengaturan Toko</h1></div>
 
     <div className="surface p-5 sm:p-6">
-      <div className="mb-6 flex flex-wrap items-start gap-5"><div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-primary-100 text-2xl font-black text-primary-800">{store.logo ? <img src={store.logo} alt={store.storeName} className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} /> : store.storeName?.charAt(0)}</div><div><h2 className="text-xl font-extrabold text-ink">{store.storeName}</h2><span className={`mt-1.5 inline-block rounded-full px-3 py-1 text-xs font-bold ${statusColor[store.status] || ''}`}>{statusLabel[store.status] || store.status}</span>{store.statusReason && <p className="mt-2 text-sm text-gray-500">{store.statusReason}</p>}</div></div>
+      <div className="mb-6 flex flex-wrap items-start gap-5"><div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-primary-100 text-2xl font-black text-primary-800">{store.logo ? <Image src={store.logo} alt={store.storeName} className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} /> : store.storeName?.charAt(0)}</div><div><h2 className="text-xl font-extrabold text-ink">{store.storeName}</h2><span className={`mt-1.5 inline-block rounded-full px-3 py-1 text-xs font-bold ${statusColor[store.status] || ''}`}>{statusLabel[store.status] || store.status}</span>{store.statusReason && <p className="mt-2 text-sm text-gray-500">{store.statusReason}</p>}</div></div>
 
       {editing ? <form onSubmit={submit} className="space-y-5">
         <ImageUploader images={logo} onChange={setLogo} maxImages={1} folder="logos" />

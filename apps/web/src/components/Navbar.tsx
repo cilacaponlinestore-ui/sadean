@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
 
@@ -20,7 +21,7 @@ export default function Navbar() {
     <header className="sticky top-0 z-50 border-b border-black/5 bg-canvas/90 backdrop-blur-xl">
       <nav className="page-container flex h-[72px] items-center justify-between gap-4" aria-label="Navigasi utama">
         <Link href="/" className="focus-ring flex items-center gap-3 rounded-lg">
-          <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl"><img src="/logo.png" alt="SADEAN" className="h-full w-full object-cover" /></span>
+          <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl"><Image src="/logo.png" alt="SADEAN" className="h-full w-full object-cover" /></span>
           <span><span className="block text-lg font-black leading-none tracking-tight text-ink">SADEAN</span><span className="mt-1 hidden text-[10px] font-bold uppercase tracking-[.16em] text-gray-500 sm:block">Dodolane Wong Cilacap</span></span>
         </Link>
         <div className="hidden items-center gap-1 md:flex">{links.map((link) => <Link key={link.href} href={link.href} className={`focus-ring rounded-xl px-4 py-2 text-sm font-bold ${active(link.href) ? 'bg-primary-100 text-primary-800' : 'text-gray-600 hover:bg-white hover:text-ink'}`}>{link.label}</Link>)}</div>

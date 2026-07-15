@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
+import Image from 'next/image';
 
 interface Product { id: string; name: string; slug: string; price: number; stock: number; images: { imageUrl: string }[]; isActive: boolean; category: { name: string }; }
 
@@ -28,7 +29,7 @@ export default function SellerProductsPage() {
         {['Produk', 'Harga', 'Stok', 'Status', 'Aksi'].map((h) => <th key={h} className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-gray-500">{h}</th>)}
       </tr></thead><tbody className="divide-y divide-black/5">
         {products.map((p) => <tr key={p.id} className="hover:bg-canvas">
-          <td className="px-4 py-3"><div className="flex items-center gap-3"><div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#eee9df]">{p.images[0] ? <img src={p.images[0].imageUrl} alt={p.name} className="h-full w-full object-cover" /> : <span className="text-sm">📦</span>}</div><div><p className="text-sm font-extrabold text-ink">{p.name}</p><p className="text-xs text-gray-500">{p.category?.name}</p></div></div></td>
+          <td className="px-4 py-3"><div className="flex items-center gap-3"><div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#eee9df]">{p.images[0] ? <Image src={p.images[0].imageUrl} alt={p.name} className="h-full w-full object-cover" /> : <span className="text-sm">📦</span>}</div><div><p className="text-sm font-extrabold text-ink">{p.name}</p><p className="text-xs text-gray-500">{p.category?.name}</p></div></div></td>
           <td className="px-4 py-3 text-sm font-bold text-ink">{rupiah.format(p.price)}</td>
           <td className="px-4 py-3 text-sm text-ink">{p.stock}</td>
           <td className="px-4 py-3"><span className={`inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold ${p.isActive ? 'bg-primary-100 text-primary-700' : 'bg-gray-100 text-gray-600'}`}>{p.isActive ? 'Aktif' : 'Nonaktif'}</span></td>

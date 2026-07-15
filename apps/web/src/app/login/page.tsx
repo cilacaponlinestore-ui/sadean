@@ -6,6 +6,7 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/lib/store';
 import { supabase } from '@/lib/supabase';
+import Image from 'next/image';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -26,7 +27,7 @@ export default function LoginPage() {
     <main className="grid min-h-screen bg-canvas lg:grid-cols-[1.05fr_.95fr]">
       <section className="relative hidden overflow-hidden bg-ink p-12 text-white lg:flex lg:flex-col lg:justify-between">
         <div className="absolute -right-24 top-20 h-80 w-80 rounded-full bg-primary-500/25 blur-3xl" /><div className="absolute -bottom-20 -left-20 h-72 w-72 rounded-full bg-clay-500/20 blur-3xl" />
-        <Link href="/" className="relative flex items-center gap-3 font-black"><img src="/logo.png" alt="SADEAN" className="h-11 w-11 rounded-xl object-cover"/><span>SADEAN</span></Link>
+        <Link href="/" className="relative flex items-center gap-3 font-black"><Image src="/logo.png" alt="SADEAN" className="h-11 w-11 rounded-xl object-cover"/><span>SADEAN</span></Link>
         <div className="relative max-w-xl"><p className="text-xs font-bold uppercase tracking-[.2em] text-primary-300">Dodolane Wong Cilacap</p><h1 className="mt-5 text-5xl font-black leading-tight tracking-[-.04em]">Satu akun untuk belanja dan bertumbuh bersama Cilacap.</h1><p className="mt-6 text-lg leading-8 text-white/65">Temukan produk khas, dukung tetangga, dan kelola usaha lokal dari satu tempat.</p></div>
         <p className="relative text-sm text-white/45">Marketplace digital UMKM Cilacap</p>
       </section>

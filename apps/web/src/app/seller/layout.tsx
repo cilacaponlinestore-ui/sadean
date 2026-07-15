@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
+import Image from 'next/image';
 
 const sellerLinks = [
   { href: '/dashboard', label: 'Ringkasan', icon: '⌂' }, { href: '/seller/products', label: 'Produk', icon: '□' },
@@ -44,7 +45,7 @@ export default function SellerLayout({
       <header className="sticky top-0 z-50 border-b border-black/5 bg-canvas/90 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
-            <Link href="/" className="flex items-center gap-2 font-black text-ink"><img src="/logo.png" alt="SADEAN" className="h-9 w-9 rounded-xl object-cover"/> SADEAN <span className="hidden rounded-full bg-primary-100 px-2 py-1 text-[10px] uppercase tracking-wider text-primary-800 sm:inline">Seller</span></Link>
+            <Link href="/" className="flex items-center gap-2 font-black text-ink"><Image src="/logo.png" alt="SADEAN" className="h-9 w-9 rounded-xl object-cover"/> SADEAN <span className="hidden rounded-full bg-primary-100 px-2 py-1 text-[10px] uppercase tracking-wider text-primary-800 sm:inline">Seller</span></Link>
             <div className="flex items-center gap-4">
               <span className="hidden text-sm font-bold text-gray-700 sm:block">{user.name}</span>
               <button

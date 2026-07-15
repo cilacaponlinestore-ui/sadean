@@ -8,6 +8,7 @@ import { usersApi } from '@/lib/api';
 import toast from 'react-hot-toast';
 import ImageUploader from '@/components/ImageUploader';
 import type { ImageItem } from '@/components/ImageUploader';
+import Image from 'next/image';
 
 const inputCls = 'focus-ring mt-2 h-12 w-full rounded-xl border border-black/10 bg-white px-4 outline-none';
 const labelCls = 'text-sm font-bold text-gray-700';
@@ -34,7 +35,7 @@ export default function ProfilePage() {
     <main className="page-container max-w-2xl py-8 sm:py-12">
       <div className="surface p-5 sm:p-8">
         <div className="flex items-center gap-5 border-b border-black/5 pb-6">
-          <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-primary-100 text-2xl font-black text-primary-800">{user.avatar ? <img src={user.avatar} alt={user.name} className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} /> : user.name.charAt(0).toUpperCase()}</div>
+          <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-primary-100 text-2xl font-black text-primary-800">{user.avatar ? <Image src={user.avatar} alt={user.name} className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} /> : user.name.charAt(0).toUpperCase()}</div>
           <div className="min-w-0"><h2 className="truncate text-xl font-extrabold text-ink">{user.name}</h2><p className="truncate text-sm text-gray-500">{user.email}</p><span className="mt-1.5 inline-block rounded-full bg-primary-100 px-3 py-1 text-xs font-bold text-primary-800">{roleLabel[user.role] || user.role}</span></div>
         </div>
 

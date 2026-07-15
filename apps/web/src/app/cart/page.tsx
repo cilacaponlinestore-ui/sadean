@@ -7,6 +7,7 @@ import api from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
 import Navbar from '@/components/Navbar';
 import toast from 'react-hot-toast';
+import Image from 'next/image';
 
 interface CartItem {
   productId: string;
@@ -40,7 +41,7 @@ export default function CartPage() {
         <p className="mt-5 text-sm text-gray-500">Pesanan ini diproses oleh <span className="font-bold text-ink">{items[0]?.product?.seller?.storeName || 'satu toko'}</span>.</p>
         <div className="mt-6 grid gap-10 lg:grid-cols-[1fr_380px]">
           <div className="space-y-4">{items.map((item) => <div key={item.productId} className="surface flex flex-col gap-4 p-4 sm:flex-row sm:items-start">
-            <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-[#eee9df]">{(item.product as any).image ? <img src={(item.product as any).image} alt={item.product.name} className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-3xl">📦</div>}</div>
+            <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-[#eee9df]">{(item.product as any).image ? <Image src={(item.product as any).image} alt={item.product.name} className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-3xl">📦</div>}</div>
             <div className="min-w-0 flex-1"><p className="font-extrabold leading-5 text-ink">{item.product.name}</p><p className="mt-1 text-sm text-gray-500">{item.product.seller?.storeName}</p><p className="mt-1 font-extrabold text-primary-700">{rupiah(Number(item.product.price))}</p>{item.product.stock !== undefined && <p className="mt-2 text-xs text-gray-500">Stok tersisa: {item.product.stock}</p>}</div>
             <div className="flex items-center justify-between gap-3 sm:flex-col-reverse sm:items-end">
               <button onClick={() => remove(item.productId)} className="focus-ring rounded-lg px-3 py-2 text-sm font-bold text-red-600 hover:bg-red-50">Hapus</button>

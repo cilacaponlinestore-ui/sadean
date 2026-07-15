@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useAuthStore } from '@/lib/store';
 import { supabase } from '@/lib/supabase';
 import toast from 'react-hot-toast';
+import Image from 'next/image';
 
 const input = 'focus-ring mt-2 h-12 w-full rounded-xl border border-black/10 bg-white px-4 outline-none';
 
@@ -24,7 +25,7 @@ export default function RegisterPage() {
 
   return <main className="min-h-screen overflow-hidden bg-canvas px-4 py-10 sm:py-14">
     <div className="pointer-events-none fixed -right-24 top-0 h-80 w-80 rounded-full bg-primary-200/50 blur-3xl"/><div className="pointer-events-none fixed -bottom-24 -left-24 h-80 w-80 rounded-full bg-clay-100 blur-3xl"/>
-    <div className="relative mx-auto w-full max-w-2xl"><Link href="/" className="focus-ring mb-8 inline-flex items-center gap-3 rounded-xl"><img src="/logo.png" alt="SADEAN" className="h-10 w-10 rounded-xl object-cover"/><span className="font-black text-ink">SADEAN</span></Link>
+    <div className="relative mx-auto w-full max-w-2xl"><Link href="/" className="focus-ring mb-8 inline-flex items-center gap-3 rounded-xl"><Image src="/logo.png" alt="SADEAN" className="h-10 w-10 rounded-xl object-cover"/><span className="font-black text-ink">SADEAN</span></Link>
 
       <div className="surface p-5 sm:p-8"><p className="eyebrow">Mulai dari sini</p><h1 className="mt-3 text-3xl font-black tracking-tight text-ink">Buat akun SADEAN</h1><p className="mt-2 text-gray-500">Belanja lokal atau bawa usahamu ditemukan lebih banyak orang.</p>
 

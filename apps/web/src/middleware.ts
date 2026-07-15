@@ -27,7 +27,7 @@ export function middleware(request: NextRequest) {
 
   const role = extractRole(token)
 
-  if (pathname.startsWith('/admin') && role !== 'admin') {
+  if (pathname.startsWith('/admin') && role !== 'admin' && role !== 'super_admin') {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 

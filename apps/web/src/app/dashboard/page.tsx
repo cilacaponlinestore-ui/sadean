@@ -9,6 +9,8 @@ import toast from 'react-hot-toast';
 
 const rupiah = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 });
 
+const roleTitle: Record<string, string> = { seller: 'Penjual', admin: 'Admin', super_admin: 'Super Admin' };
+
 export default function DashboardPage() {
   const router = useRouter();
   const { user, isAuthenticated, isLoading, logout } = useAuthStore();
@@ -16,20 +18,26 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => { if (!isLoading && !isAuthenticated) router.push('/login'); }, [isLoading, isAuthenticated, router]);
-  useEffect(() => { if (!user) return; if (user.role === 'buyer') { router.replace('/'); return; } (user.role === 'seller' ? sellersApi.getDashboard() : adminApi.getDashboard()).then((r) => setData(r.data)).catch(() => toast.error('Gagal memuat dashboard')).finally(() => setLoading(false)); }, [user]);
-
-  const handleLogout = async () => { await logout(); toast.success('Berhasil logout'); router.push('/login'); };
+  useEffect(() => {
+    if (!user) return;
+    if (user.role === 'buyer') { router.replace('/'); return; }
+    const fetcher = user.role === 'seller' ? sellersApi.getDashboard() : adminApi.getDashboard();
+    fetcher.then((r: any) => setData(r.data)).catch(() => toast.error('Gagal memuat dashboard')).finally(() => setLoading(false));
+  }, [user]);
 
   if (isLoading || !user) return <div className="flex min-h-screen items-center justify-center bg-canvas"><div className="h-10 w-10 animate-spin rounded-full border-2 border-primary-200 border-t-primary-700" /></div>;
   if (loading) return <div className="min-h-screen bg-canvas"><div className="page-container py-20 text-center font-bold text-gray-500">Memuat dashboard...</div></div>;
 
+  const title = roleTitle[user.role] || 'Dashboard';
+
   return <div className="min-h-screen bg-canvas">
-    <header className="sticky top-0 z-40 border-b border-black/5 bg-canvas/90 backdrop-blur-xl"><div className="page-container flex h-16 items-center justify-between"><Link href="/" className="focus-ring flex items-center gap-3"><img src="/icon.svg" alt="SADEAN" className="h-9 w-9" /><span className="text-lg font-black tracking-tight text-ink">SADEAN</span></Link><div className="flex items-center gap-3"><span className="hidden text-sm font-bold text-gray-700 sm:block">{user.name}</span><button onClick={handleLogout} className="focus-ring rounded-xl px-4 py-2 text-sm font-bold text-red-600 hover:bg-red-50">Keluar</button></div></div></header>
+    <header className="sticky top-0 z-40 border-b border-black/5 bg-canvas/90 backdrop-blur-xl"><div className="page-container flex h-16 items-center justify-between"><Link href="/" className="focus-ring flex items-center gap-3"><img src="/icon.svg" alt="SADEAN" className="h-9 w-9" /><span className="text-lg font-black tracking-tight text-ink">SADEAN</span></Link><div className="flex items-center gap-3"><span className="text-xs font-bold uppercase tracking-wider text-primary-700">{title}</span><span className="hidden text-sm font-bold text-gray-700 sm:block">{user.name}</span><button onClick={async () => { await logout(); toast.success('Berhasil logout'); router.push('/login'); }} className="focus-ring rounded-xl px-4 py-2 text-sm font-bold text-red-600 hover:bg-red-50">Keluar</button></div></div></header>
     <main className="page-container py-8 sm:py-12">
-      <p className="eyebrow">Dashboard {user.role === 'seller' ? 'Penjual' : 'Admin'}</p><h1 className="mt-2 text-3xl font-black tracking-tight text-ink">{user.role === 'seller' ? 'Toko {user.name}' : 'Panel Admin'}</h1>
+      <p className="eyebrow">Dashboard {title}</p><h1 className="mt-2 text-3xl font-black tracking-tight text-ink">{user.role === 'seller' ? 'Toko Anda' : 'Panel Kontrol'}</h1>
 
       {user.role === 'seller' && <SellerDashboard data={data} />}
       {user.role === 'admin' && <AdminDashboard data={data} />}
+      {user.role === 'super_admin' && <SuperAdminDashboard data={data} />}
     </main>
   </div>;
 }
@@ -52,9 +60,30 @@ function SellerDashboard({ data }: { data: any }) {
 function AdminDashboard({ data }: { data: any }) {
   if (!data) return <div className="surface mt-8 py-14 text-center font-extrabold text-ink">Belum ada data</div>;
   return <div className="mt-8 space-y-8">
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">{[['Total User', data.totalUsers], ['Buyer', data.totalBuyers], ['Seller', data.totalSellers], ['UMKM', data.totalUmkm], ['Produk', data.totalProducts], ['Order', data.totalOrders], ['Order Hari Ini', data.todayOrders, 'text-primary-700'], ['Verifikasi', data.pendingSellers, 'text-orange-600']].map(([l, v, c]) => <StatCard key={String(l)} label={String(l)} value={v || 0} color={c as string || 'text-ink'} />)}</div>
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      {[['Total User', data.totalUsers], ['Buyer', data.totalBuyers], ['Seller', data.totalSellers], ['UMKM', data.totalUmkm], ['Produk', data.totalProducts], ['Order', data.totalOrders], ['Order Hari Ini', data.todayOrders, 'text-primary-700'], ['Verifikasi', data.pendingSellers, 'text-orange-600']].map(([l, v, c]) => <StatCard key={String(l)} label={String(l)} value={v || 0} color={c as string || 'text-ink'} />)}
+    </div>
     <div className="grid gap-4 sm:grid-cols-5">{[
       { href: '/admin/users', label: 'Users' }, { href: '/admin/sellers', label: 'Verifikasi UMKM' }, { href: '/admin/products', label: 'Produk' }, { href: '/admin/banners', label: 'Banner' }, { href: '/profile', label: 'Profil' },
     ].map((a) => <Link key={a.href} href={a.href} className="focus-ring surface flex items-center justify-center p-4 text-sm font-bold text-ink transition hover:-translate-y-1">{a.label}</Link>)}</div>
+  </div>;
+}
+
+function SuperAdminDashboard({ data }: { data: any }) {
+  if (!data) return <div className="surface mt-8 py-14 text-center font-extrabold text-ink">Belum ada data</div>;
+  return <div className="mt-8 space-y-8">
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      {[['Total User', data.totalUsers], ['Buyer', data.totalBuyers], ['Seller', data.totalSellers], ['UMKM', data.totalUmkm], ['Produk', data.totalProducts], ['Order', data.totalOrders], ['Order Hari Ini', data.todayOrders, 'text-primary-700'], ['Verifikasi Pending', data.pendingSellers, 'text-orange-600']].map(([l, v, c]) => <StatCard key={String(l)} label={String(l)} value={v || 0} color={c as string || 'text-ink'} />)}
+    </div>
+    <div className="grid gap-4 sm:grid-cols-3">{[
+      { href: '/admin/users', label: 'Manajemen Users' }, { href: '/admin/sellers', label: 'Verifikasi UMKM' }, { href: '/admin/banners', label: 'Banner' },
+    ].map((a) => <Link key={a.href} href={a.href} className="focus-ring surface flex items-center justify-center p-4 text-sm font-bold text-ink transition hover:-translate-y-1">{a.label}</Link>)}</div>
+    <div className="rounded-2xl border border-black/5 bg-white p-5">
+      <p className="font-black text-ink">Akses Super Admin</p>
+      <p className="mt-1 text-sm text-gray-500">Super Admin memiliki akses penuh ke seluruh panel admin dan seller.</p>
+      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        {[{ href: '/admin/users', label: 'Kelola Semua Users' }, { href: '/admin/sellers', label: 'Moderasi Seller' }, { href: '/admin/products', label: 'Moderasi Produk' }, { href: '/admin/banners', label: 'Kelola Banner' }].map((a) => <Link key={a.href} href={a.href} className="focus-ring rounded-xl border border-black/10 bg-canvas px-4 py-3 text-sm font-bold text-ink hover:bg-white transition">{a.label}</Link>)}
+      </div>
+    </div>
   </div>;
 }

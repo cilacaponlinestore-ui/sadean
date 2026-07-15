@@ -7,7 +7,7 @@ interface User {
   email: string;
   name: string;
   phone?: string;
-  role: 'buyer' | 'seller' | 'admin';
+  role: 'buyer' | 'seller' | 'admin' | 'super_admin';
   avatar?: string;
 }
 

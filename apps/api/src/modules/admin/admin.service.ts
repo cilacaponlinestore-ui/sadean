@@ -7,7 +7,19 @@ export class AdminService {
   constructor(private prisma: PrismaService) {}
 
   async getDashboard() {
-    return { ok: true, totalUsers: 0 };
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const [totalUsers, totalBuyers, totalSellers, totalUmkm, totalProducts, totalOrders, todayOrders, pendingSellers, latestProducts] = await Promise.all([
+      this.prisma.user.count(),
+      this.prisma.user.count({ where: { role: 'buyer' } }),
+      this.prisma.user.count({ where: { role: 'seller' } }),
+      this.prisma.seller.count(),
+      this.prisma.product.count(),
+      this.prisma.order.count(),
+      this.prisma.order.count({ where: { createdAt: { gte: today } } }),
+      this.prisma.seller.count({ where: { status: 'PENDING' as any } }),
+      this.prisma.product.findMany({ take: 5, orderBy: { createdAt: 'desc' }, include: { category: { select: { name: true } }, seller: { select: { storeName: true } }, images: { where: { isPrimary: true }, take: 1 } } }),
+    ]);
+    return { totalUsers, totalBuyers, totalSellers, totalUmkm, totalProducts, totalOrders, todayOrders, pendingSellers, latestProducts };
   }
 
   async getProducts(page = 1, limit = 20) {

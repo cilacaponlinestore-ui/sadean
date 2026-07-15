@@ -21,7 +21,7 @@ export function SellerDetailClient({ seller, products }: { seller: Seller | null
       <div className="surface overflow-hidden">
         <div className="bg-[#eee9df]/40 p-6 sm:p-8">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
-            <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-primary-100 text-2xl font-black text-primary-800 shadow-sm">
+            <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-primary-100 text-2xl font-black text-primary-800 shadow-soft">
               {seller.logo ? <img src={seller.logo} alt={seller.storeName} className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} /> : seller.storeName.charAt(0)}
             </div>
             <div className="min-w-0 flex-1">

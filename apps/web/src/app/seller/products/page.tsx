@@ -2,166 +2,38 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 
-interface Product {
-  id: string;
-  name: string;
-  slug: string;
-  price: number;
-  stock: number;
-  images: { imageUrl: string }[];
-  isActive: boolean;
-  category: { name: string };
-}
+interface Product { id: string; name: string; slug: string; price: number; stock: number; images: { imageUrl: string }[]; isActive: boolean; category: { name: string }; }
+
+const rupiah = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 });
 
 export default function SellerProductsPage() {
-
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadProducts();
-  }, []);
+  useEffect(() => { loadProducts(); }, []);
+  const loadProducts = async () => { try { const r = await api.get('/products/my-products'); setProducts(r.data); } catch { toast.error('Gagal memuat produk'); } finally { setLoading(false); } };
+  const handleDelete = async (id: string) => { if (!confirm('Yakin ingin menghapus produk ini?')) return; try { await api.delete(`/products/${id}`); toast.success('Produk berhasil dihapus'); loadProducts(); } catch { toast.error('Gagal menghapus produk'); } };
 
-  const loadProducts = async () => {
-    try {
-      const response = await api.get('/products/my-products');
-      setProducts(response.data);
-    } catch (error) {
-      toast.error('Gagal memuat produk');
-    } finally {
-      setLoading(false);
-    }
-  };
+  if (loading) return <div className="flex min-h-40 items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-primary-200 border-t-primary-700" /></div>;
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Yakin ingin menghapus produk ini?')) return;
-
-    try {
-      await api.delete(`/products/${id}`);
-      toast.success('Produk berhasil dihapus');
-      loadProducts();
-    } catch (error) {
-      toast.error('Gagal menghapus produk');
-    }
-  };
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      minimumFractionDigits: 0,
-    }).format(price);
-  };
-
-  if (loading) {
-    return <div className="text-center py-8">Memuat data...</div>;
-  }
-
-  return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Produk Saya</h1>
-        <Link
-          href="/seller/products/new"
-          className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
-        >
-          + Tambah Produk
-        </Link>
-      </div>
-
-      {products.length === 0 ? (
-        <div className="bg-white rounded-lg shadow p-8 text-center">
-          <p className="text-gray-500 mb-4">Belum ada produk</p>
-          <Link
-            href="/seller/products/new"
-            className="inline-block px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
-          >
-            Tambah Produk Pertama
-          </Link>
-        </div>
-      ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Produk
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Harga
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Stok
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Aksi
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {products.map((product) => (
-                <tr key={product.id}>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                        {product.images[0] ? (
-                          <img
-                            src={product.images[0].imageUrl}
-                            alt={product.name}
-                            className="w-full h-full object-cover rounded-lg"
-                          />
-                        ) : (
-                          <span className="text-xl">📦</span>
-                        )}
-                      </div>
-                      <div>
-                        <p className="font-medium">{product.name}</p>
-                        <p className="text-sm text-gray-500">{product.category?.name}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 font-medium">{formatPrice(product.price)}</td>
-                  <td className="px-6 py-4">{product.stock}</td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`px-2 py-1 text-xs font-medium rounded ${
-                        product.isActive
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-gray-100 text-gray-700'
-                      }`}
-                    >
-                      {product.isActive ? 'Aktif' : 'Nonaktif'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex gap-2">
-                      <Link
-                        href={`/seller/products/${product.slug}/edit`}
-                        className="px-3 py-1 text-sm text-primary-600 hover:bg-primary-50 rounded"
-                      >
-                        Edit
-                      </Link>
-                      <button
-                        onClick={() => handleDelete(product.id)}
-                        className="px-3 py-1 text-sm text-red-600 hover:bg-red-50 rounded"
-                      >
-                        Hapus
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
-  );
+  return <div>
+    <div className="mb-6 flex items-center justify-between"><h1 className="text-2xl font-black tracking-tight text-ink">Produk Saya</h1><Link href="/seller/products/new" className="focus-ring rounded-xl bg-primary-700 px-5 py-2.5 text-sm font-bold text-white hover:bg-primary-800">Tambah Produk</Link></div>
+    {products.length === 0 ? (
+      <div className="surface p-8 text-center"><p className="text-gray-500 mb-4">Belum ada produk</p><Link href="/seller/products/new" className="focus-ring inline-flex h-12 items-center rounded-xl bg-primary-700 px-6 font-bold text-white hover:bg-primary-800">Tambah Produk Pertama</Link></div>
+    ) : (
+      <div className="surface overflow-hidden"><table className="min-w-full divide-y divide-black/5"><thead className="bg-canvas"><tr>
+        {['Produk', 'Harga', 'Stok', 'Status', 'Aksi'].map((h) => <th key={h} className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-gray-500">{h}</th>)}
+      </tr></thead><tbody className="divide-y divide-black/5">
+        {products.map((p) => <tr key={p.id} className="hover:bg-canvas">
+          <td className="px-4 py-3"><div className="flex items-center gap-3"><div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#eee9df]">{p.images[0] ? <img src={p.images[0].imageUrl} alt={p.name} className="h-full w-full object-cover" /> : <span className="text-sm">📦</span>}</div><div><p className="text-sm font-extrabold text-ink">{p.name}</p><p className="text-xs text-gray-500">{p.category?.name}</p></div></div></td>
+          <td className="px-4 py-3 text-sm font-bold text-ink">{rupiah.format(p.price)}</td>
+          <td className="px-4 py-3 text-sm text-ink">{p.stock}</td>
+          <td className="px-4 py-3"><span className={`inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold ${p.isActive ? 'bg-primary-100 text-primary-700' : 'bg-gray-100 text-gray-600'}`}>{p.isActive ? 'Aktif' : 'Nonaktif'}</span></td>
+          <td className="px-4 py-3"><div className="flex gap-2"><Link href={`/seller/products/${p.slug}/edit`} className="focus-ring rounded-lg px-3 py-1.5 text-xs font-bold text-primary-700 hover:bg-primary-50">Edit</Link><button onClick={() => handleDelete(p.id)} className="focus-ring rounded-lg px-3 py-1.5 text-xs font-bold text-red-600 hover:bg-red-50">Hapus</button></div></td>
+        </tr>)}
+      </tbody></table></div>
+    )}</div>;
 }

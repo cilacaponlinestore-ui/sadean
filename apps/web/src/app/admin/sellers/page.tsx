@@ -1,74 +1,43 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 
-type SellerStatus = 'PENDING' | 'VERIFIED' | 'REJECTED' | 'SUSPENDED';
-interface Seller {
-  id: string; storeName: string; description: string | null; phone: string | null;
-  whatsapp: string | null; status: SellerStatus; statusReason: string | null;
-  user: { name: string; email: string }; createdAt: string;
-}
+interface Seller { id: string; storeName: string; slug: string; phone: string; logo?: string; status: 'PENDING' | 'VERIFIED' | 'REJECTED' | 'SUSPENDED'; createdAt: string; _count: { products: number }; }
 
-const labels: Record<SellerStatus, string> = {
-  PENDING: 'Menunggu', VERIFIED: 'Terverifikasi', REJECTED: 'Ditolak', SUSPENDED: 'Ditangguhkan',
-};
+const statusLabel: Record<string, string> = { PENDING: 'Menunggu', VERIFIED: 'Terverifikasi', REJECTED: 'Ditolak', SUSPENDED: 'Dinonaktifkan' };
+const statusColor: Record<string, string> = { PENDING: 'bg-yellow-100 text-yellow-700', VERIFIED: 'bg-primary-100 text-primary-700', REJECTED: 'bg-red-100 text-red-700', SUSPENDED: 'bg-gray-100 text-gray-700' };
+const filt = ['all', 'PENDING', 'VERIFIED', 'REJECTED', 'SUSPENDED'];
 
 export default function AdminSellersPage() {
   const [sellers, setSellers] = useState<Seller[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('ALL');
+  const [filter, setFilter] = useState('all');
 
-  const loadSellers = async () => {
-    try {
-      const response = await api.get<{ sellers: Seller[] }>('/sellers', {
-        params: filter === 'ALL' ? {} : { status: filter },
-      });
-      setSellers(response.data.sellers);
-    } catch { toast.error('Gagal memuat data UMKM'); }
-    finally { setLoading(false); }
+  const load = async () => { try { const r = await api.get<{ sellers: Seller[] }>('/sellers'); setSellers(r.data.sellers); } catch { toast.error('Gagal memuat data'); } finally { setLoading(false); } };
+  useEffect(() => { load(); }, []);
+
+  const moderate = async (id: string, action: 'approve' | 'reject' | 'suspend') => {
+    const confirmMsg = { approve: 'Setujui toko ini?', reject: 'Tolak toko ini?', suspend: 'Tangguhkan toko ini?' };
+    if (!confirm(confirmMsg[action])) return;
+    try { await api.put(`/sellers/${id}/${action}`); toast.success('Status diperbarui'); load(); } catch { toast.error('Gagal memperbarui status'); }
   };
 
-  useEffect(() => { loadSellers(); }, [filter]);
+  const filtered = filter === 'all' ? sellers : sellers.filter((s) => s.status === filter);
 
-  const moderate = async (seller: Seller, action: 'approve' | 'reject' | 'suspend' | 'activate') => {
-    let reason: string | null = null;
-    if (action === 'reject' || action === 'suspend') {
-      reason = prompt(action === 'reject' ? 'Alasan penolakan:' : 'Alasan penangguhan:');
-      if (!reason?.trim()) return;
-    }
-    try {
-      await api.put(`/sellers/${seller.id}/${action}`, reason ? { reason: reason.trim() } : {});
-      toast.success('Status UMKM diperbarui');
-      loadSellers();
-    } catch { toast.error('Gagal memperbarui status UMKM'); }
-  };
-
-  if (loading) return <div className="text-center py-8">Memuat data...</div>;
+  if (loading) return <div className="flex min-h-40 items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-primary-200 border-t-primary-700" /></div>;
 
   return <div>
-    <h1 className="text-2xl font-bold mb-6">Moderasi UMKM</h1>
-    <div className="flex flex-wrap gap-2 mb-6">
-      {['ALL', 'PENDING', 'VERIFIED', 'REJECTED', 'SUSPENDED'].map((status) =>
-        <button key={status} onClick={() => setFilter(status)} className={`px-4 py-2 text-sm rounded-lg ${filter === status ? 'bg-primary-600 text-white' : 'bg-white text-gray-600 border'}`}>
-          {status === 'ALL' ? 'Semua' : labels[status as SellerStatus]}
-        </button>)}
-    </div>
-    <div className="space-y-4">{sellers.map((seller) =>
-      <div key={seller.id} className="bg-white rounded-lg shadow p-6 flex flex-col md:flex-row justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2"><h3 className="font-semibold text-lg">{seller.storeName}</h3><span className="px-2 py-1 text-xs bg-gray-100 rounded">{labels[seller.status]}</span></div>
-          <p className="text-gray-500 mt-1">{seller.description || 'Tidak ada deskripsi'}</p>
-          <div className="mt-2 text-sm text-gray-500"><p>Pemilik: {seller.user.name} ({seller.user.email})</p><p>Telepon: {seller.phone || '-'}</p><p>WhatsApp: {seller.whatsapp || '-'}</p><p>Bergabung: {new Date(seller.createdAt).toLocaleDateString('id-ID')}</p>{seller.statusReason && <p className="text-red-600">Alasan: {seller.statusReason}</p>}</div>
-        </div>
-        <div className="flex flex-wrap gap-2 items-start">
-          {seller.status !== 'VERIFIED' && <button onClick={() => moderate(seller, seller.status === 'SUSPENDED' ? 'activate' : 'approve')} className="px-3 py-2 bg-green-600 text-white text-sm rounded">{seller.status === 'SUSPENDED' ? 'Aktifkan' : 'Setujui'}</button>}
-          {seller.status === 'PENDING' && <button onClick={() => moderate(seller, 'reject')} className="px-3 py-2 bg-red-100 text-red-700 text-sm rounded">Tolak</button>}
-          {seller.status === 'VERIFIED' && <button onClick={() => moderate(seller, 'suspend')} className="px-3 py-2 bg-red-100 text-red-700 text-sm rounded">Tangguhkan</button>}
-        </div>
-      </div>)}
-      {!sellers.length && <div className="bg-white rounded-lg shadow p-8 text-center text-gray-500">Tidak ada data</div>}
-    </div>
-  </div>;
+    <h1 className="text-2xl font-black tracking-tight text-ink mb-6">Verifikasi UMKM</h1>
+    <div className="mb-6 flex flex-wrap gap-2">{filt.map((s) => <button key={s} onClick={() => setFilter(s)} className={`focus-ring rounded-xl px-4 py-2 text-sm font-bold transition ${filter === s ? 'bg-primary-700 text-white' : 'border border-black/10 bg-white text-ink hover:bg-canvas'}`}>{s === 'all' ? 'Semua' : statusLabel[s]}</button>)}</div>
+    {filtered.length === 0 ? <div className="surface p-8 text-center text-gray-500">Belum ada data</div> : (
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {filtered.map((s) => <div key={s.id} className="surface p-5">
+          <div className="mb-4 flex items-start gap-4"><div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-primary-100 text-lg font-black text-primary-800">{s.logo ? <img src={s.logo} alt="" className="h-full w-full object-cover" /> : s.storeName[0]}</div><div className="min-w-0 flex-1"><p className="font-extrabold text-ink truncate">{s.storeName}</p><span className={`mt-1 inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold ${statusColor[s.status]}`}>{statusLabel[s.status]}</span></div></div>
+          <div className="mb-4 flex gap-4 text-sm"><span className="text-gray-500">{s._count?.products || 0} produk</span><span className="text-gray-400">{new Date(s.createdAt).toLocaleDateString('id-ID')}</span></div>
+        </div>)}
+      </div>
+    )}</div>;
 }

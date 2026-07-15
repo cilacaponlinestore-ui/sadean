@@ -10,7 +10,7 @@ export function middleware(request: NextRequest) {
 
   const isPublic = pathname === '/' || publicRoutes.some((route) => pathname.startsWith(route))
   const isAuthPage = authPages.some((route) => pathname === route)
-  const isStatic = pathname.startsWith('/_next') || pathname.startsWith('/icons') || pathname.startsWith('/manifest') || pathname === '/sw.js' || pathname === '/favicon.ico' || pathname === '/offline' || pathname === '/icon.svg'
+  const isStatic = pathname.startsWith('/_next') || pathname.startsWith('/icons') || pathname.startsWith('/manifest') || pathname === '/sw.js' || pathname === '/favicon.ico' || pathname === '/offline' || pathname === '/icon.svg' || pathname === '/logo.png'
 
   if (isStatic) return NextResponse.next()
 
@@ -48,5 +48,5 @@ function extractRole(token: string): string | null {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|icon.svg).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|icon.svg|logo.png).*)'],
 }

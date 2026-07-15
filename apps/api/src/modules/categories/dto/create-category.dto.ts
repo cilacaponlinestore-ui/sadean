@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsUUID, IsNumber } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsNumber } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateCategoryDto {
@@ -8,7 +8,8 @@ export class CreateCategoryDto {
 
   @ApiPropertyOptional({ example: 'uuid-parent-id' })
   @IsOptional()
-  @IsUUID()
+  @IsOptional()
+  @IsString()
   parentId?: string;
 
   @ApiPropertyOptional({ example: 'Produk makanan khas Cilacap' })

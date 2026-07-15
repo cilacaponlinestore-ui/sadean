@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsUUID, IsNumber, IsBoolean } from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsBoolean } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateCategoryDto {
@@ -9,7 +9,7 @@ export class UpdateCategoryDto {
 
   @ApiPropertyOptional({ example: 'uuid-parent-id' })
   @IsOptional()
-  @IsUUID()
+  @IsString()
   parentId?: string;
 
   @ApiPropertyOptional({ example: 'Updated description' })

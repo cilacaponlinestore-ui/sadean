@@ -8,6 +8,7 @@ import {
   UseGuards,
   Req,
   Query,
+  ForbiddenException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -67,6 +68,7 @@ export class OrdersController {
     @Query('status') status?: string,
   ) {
     const seller = req.user.seller;
+    if (!seller) throw new ForbiddenException('Seller profile not found');
     return this.ordersService.findBySeller(seller.id, { page, limit, status });
   }
 

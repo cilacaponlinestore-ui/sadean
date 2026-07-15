@@ -51,7 +51,7 @@ export class ProductsController {
   @ApiOperation({ summary: 'Get my products (Seller only)' })
   async getMyProducts(@Req() req: any) {
     const seller = req.user.seller;
-    if (!seller) throw new ForbiddenException('Seller profile not found');
+    if (!seller) return [];
     return this.productsService.findBySellerId(seller.id);
   }
 

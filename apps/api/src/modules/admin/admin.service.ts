@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { SellerStatus } from '@prisma/client';
 
@@ -7,6 +7,7 @@ export class AdminService {
   constructor(private prisma: PrismaService) {}
 
   async getDashboard() {
+    try {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -37,7 +38,7 @@ export class AdminService {
           images: { where: { isPrimary: true }, take: 1 },
         },
       }),
-      this.prisma.seller.count({ where: { status: SellerStatus.PENDING } }),
+      this.prisma.seller.count({ where: { status: 'PENDING' as any } }),
     ]);
 
     return {
@@ -51,6 +52,10 @@ export class AdminService {
       latestProducts,
       pendingSellers,
     };
+    } catch (error) {
+      new Logger('AdminService').error('Dashboard failed', error instanceof Error ? error.stack : error);
+      throw error;
+    }
   }
 
   async getProducts(page = 1, limit = 20) {

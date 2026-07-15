@@ -7,25 +7,12 @@ export default function manifest(): MetadataRoute.Manifest {
     description: 'Dodolane Wong Cilacap - Marketplace UMKM Cilacap',
     start_url: '/',
     display: 'standalone',
-    background_color: '#ffffff',
+    background_color: '#f8f6f1',
     theme_color: '#059669',
     icons: [
-      {
-        src: '/icons/icon-192.svg',
-        sizes: '192x192',
-        type: 'image/svg+xml',
-      },
-      {
-        src: '/icons/icon-512.svg',
-        sizes: '512x512',
-        type: 'image/svg+xml',
-      },
-      {
-        src: '/icons/icon-512.svg',
-        sizes: '512x512',
-        type: 'image/svg+xml',
-        purpose: 'maskable',
-      },
+      { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+      { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
     ],
   }
 }

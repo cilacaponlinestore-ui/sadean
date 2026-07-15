@@ -21,9 +21,9 @@ export const metadata: Metadata = {
   formatDetection: {
     telephone: false,
   },
-  manifest: '/manifest.json',
+  manifest: '/manifest.webmanifest',
   icons: {
-    apple: '/icons/icon-192.svg',
+    apple: '/icons/icon-192.png',
   },
 };
 
@@ -38,7 +38,7 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <link rel="apple-touch-icon" href="/icons/icon-192.svg" />
+        <link rel="apple-touch-icon" href="/icons/icon-192.png" />
       </head>
       <body className={inter.className}>
         {children}

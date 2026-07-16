@@ -8,6 +8,7 @@ import {
   UseGuards,
   Req,
   Query,
+  NotFoundException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -45,7 +46,9 @@ export class SellersController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get my store profile' })
   async getMyStore(@Req() req: any) {
-    return this.sellersService.findByUserId(req.user.sub);
+    const store = await this.sellersService.findByUserIdSafe(req.user.sub);
+    if (!store) throw new NotFoundException('Anda belum mendaftarkan toko');
+    return store;
   }
 
   @Get('dashboard')
@@ -54,7 +57,10 @@ export class SellersController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get seller dashboard' })
   async getDashboard(@Req() req: any) {
-    const seller = await this.sellersService.findByUserId(req.user.sub);
+    const seller = await this.sellersService.findByUserIdSafe(req.user.sub);
+    if (!seller) {
+      return { stats: { totalProducts: 0, totalOrders: 0, pendingOrders: 0, totalRevenue: 0 }, recentOrders: [] };
+    }
     return this.sellersService.getDashboard(seller.id);
   }
 

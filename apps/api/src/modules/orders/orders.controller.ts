@@ -68,7 +68,7 @@ export class OrdersController {
     @Query('status') status?: string,
   ) {
     const seller = req.user.seller;
-    if (!seller) throw new ForbiddenException('Seller profile not found');
+    if (!seller) return { orders: [], pagination: { page: page || 1, limit: limit || 20, total: 0, totalPages: 0 } };
     return this.ordersService.findBySeller(seller.id, { page, limit, status });
   }
 

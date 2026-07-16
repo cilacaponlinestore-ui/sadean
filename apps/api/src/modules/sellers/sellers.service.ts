@@ -97,6 +97,13 @@ export class SellersService {
     return seller;
   }
 
+  async findByUserIdSafe(userId: string) {
+    return this.prisma.seller.findUnique({
+      where: { userId },
+      include: { _count: { select: { products: true } } },
+    });
+  }
+
   async findBySlug(slug: string) {
     const seller = await this.prisma.seller.findUnique({
       where: { slug },

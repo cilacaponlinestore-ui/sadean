@@ -11,6 +11,10 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 
+function superAdminEmail(): string | undefined {
+  return process.env.SUPER_ADMIN_EMAIL?.trim().toLowerCase() || undefined;
+}
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -20,8 +24,9 @@ export class AuthService {
   ) {}
 
   async register(dto: RegisterDto) {
+    const email = dto.email.trim().toLowerCase();
     const existing = await this.prisma.user.findUnique({
-      where: { email: dto.email },
+      where: { email },
     });
     if (existing) {
       throw new ConflictException('Email already exists');
@@ -31,11 +36,11 @@ export class AuthService {
 
     const user = await this.prisma.user.create({
       data: {
-        email: dto.email,
+        email,
         password: hashedPassword,
         name: dto.name,
         phone: dto.phone,
-        role: dto.role || 'buyer',
+        role: this.roleForEmail(email, dto.role || 'buyer'),
       },
     });
 
@@ -58,8 +63,9 @@ export class AuthService {
   }
 
   async login(dto: LoginDto) {
+    const email = dto.email.trim().toLowerCase();
     const user = await this.prisma.user.findUnique({
-      where: { email: dto.email },
+      where: { email },
     });
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
@@ -78,11 +84,12 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const tokens = await this.generateTokens(user.id, user.email, user.role);
+    const role = this.roleForEmail(user.email, user.role);
+    const tokens = await this.generateTokens(user.id, user.email, role);
 
     await this.prisma.user.update({
       where: { id: user.id },
-      data: { refreshToken: tokens.refreshToken, lastLogin: new Date() },
+      data: { role, refreshToken: tokens.refreshToken, lastLogin: new Date() },
     });
 
     return {
@@ -90,7 +97,7 @@ export class AuthService {
         id: user.id,
         email: user.email,
         name: user.name,
-        role: user.role,
+        role,
       },
       ...tokens,
     };
@@ -127,7 +134,7 @@ export class AuthService {
       const name = String(identity.user_metadata?.full_name || identity.user_metadata?.name || email.split('@')[0]).slice(0, 100);
       const avatar = typeof identity.user_metadata?.avatar_url === 'string' ? identity.user_metadata.avatar_url : null;
       user = await this.prisma.user.create({
-        data: { email, password: null, name, avatar, role: 'buyer', supabaseAuthId: identity.id },
+        data: { email, password: null, name, avatar, role: this.roleForEmail(email, 'buyer'), supabaseAuthId: identity.id },
       });
     } else if (!user.supabaseAuthId) {
       user = await this.prisma.user.update({
@@ -138,14 +145,15 @@ export class AuthService {
 
     if (!user.isActive) throw new UnauthorizedException('Akun Anda telah dinonaktifkan');
 
-    const tokens = await this.generateTokens(user.id, user.email, user.role);
+    const role = this.roleForEmail(user.email, user.role);
+    const tokens = await this.generateTokens(user.id, user.email, role);
     await this.prisma.user.update({
       where: { id: user.id },
-      data: { refreshToken: tokens.refreshToken, lastLogin: new Date() },
+      data: { role, refreshToken: tokens.refreshToken, lastLogin: new Date() },
     });
 
     return {
-      user: { id: user.id, email: user.email, name: user.name, role: user.role, avatar: user.avatar },
+      user: { id: user.id, email: user.email, name: user.name, role, avatar: user.avatar },
       ...tokens,
     };
   }
@@ -166,11 +174,12 @@ export class AuthService {
       throw new UnauthorizedException('Invalid refresh token');
     }
 
-    const tokens = await this.generateTokens(user.id, user.email, user.role);
+    const role = this.roleForEmail(user.email, user.role);
+    const tokens = await this.generateTokens(user.id, user.email, role);
 
     await this.prisma.user.update({
       where: { id: user.id },
-      data: { refreshToken: tokens.refreshToken },
+      data: { role, refreshToken: tokens.refreshToken },
     });
 
     return tokens;
@@ -195,5 +204,10 @@ export class AuthService {
     });
 
     return { accessToken, refreshToken };
+  }
+
+  private roleForEmail(email: string, fallback: string) {
+    const sa = superAdminEmail();
+    return sa && email.trim().toLowerCase() === sa ? 'super_admin' : fallback;
   }
 }

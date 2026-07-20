@@ -35,24 +35,34 @@ export class CartService {
     });
 
     const items = cart?.items || [];
+    if (items.length === 0) {
+      return {
+        items: [],
+        sellerId: cart?.sellerId || null,
+        total: 0,
+        itemCount: 0,
+      };
+    }
 
-    const itemsWithDetails = await Promise.all(
-      items.map(async (item) => {
-        const product = await this.prisma.product.findUnique({
-          where: { id: item.productId },
-          include: {
-            seller: {
-              select: { id: true, storeName: true },
-            },
-            images: {
-              where: { isPrimary: true },
-              take: 1,
-            },
-          },
-        });
+    const productIds = items.map((item) => item.productId);
+    const products = await this.prisma.product.findMany({
+      where: { id: { in: productIds } },
+      include: {
+        seller: {
+          select: { id: true, storeName: true },
+        },
+        images: {
+          where: { isPrimary: true },
+          take: 1,
+        },
+      },
+    });
+    const productById = new Map(products.map((p) => [p.id, p]));
 
+    const validItems = items
+      .map((item) => {
+        const product = productById.get(item.productId);
         if (!product) return null;
-
         return {
           productId: item.productId,
           quantity: item.quantity,
@@ -66,10 +76,9 @@ export class CartService {
             seller: product.seller,
           },
         };
-      }),
-    );
+      })
+      .filter((item): item is NonNullable<typeof item> => item !== null);
 
-    const validItems = itemsWithDetails.filter((item) => item !== null);
     const subtotal = validItems.reduce(
       (sum, item) => sum + Number(item.product.price) * item.quantity,
       0,

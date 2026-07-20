@@ -188,7 +188,9 @@ export class ProductsService {
       this.prisma.product.findMany({
         where,
         include: {
-          category: true,
+          category: {
+            select: { id: true, name: true, slug: true },
+          },
           seller: {
             select: {
               id: true,

@@ -1,23 +1,32 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { MemoryCache } from '../../common/cache/memory-cache';
 import { CreateBannerDto } from './dto/create-banner.dto';
 import { UpdateBannerDto } from './dto/update-banner.dto';
 
 @Injectable()
 export class BannersService {
+  private activeCache = new MemoryCache<any[]>(60_000);
+
   constructor(private prisma: PrismaService) {}
 
   async create(dto: CreateBannerDto) {
-    return this.prisma.banner.create({
+    const row = await this.prisma.banner.create({
       data: dto,
     });
+    this.activeCache.clear();
+    return row;
   }
 
   async findAll() {
-    return this.prisma.banner.findMany({
+    const hit = this.activeCache.get('active');
+    if (hit) return hit;
+    const rows = await this.prisma.banner.findMany({
       where: { isActive: true },
       orderBy: { sortOrder: 'asc' },
     });
+    this.activeCache.set('active', rows);
+    return rows;
   }
 
   async findAllAdmin() {
@@ -47,10 +56,12 @@ export class BannersService {
       throw new NotFoundException('Banner not found');
     }
 
-    return this.prisma.banner.update({
+    const row = await this.prisma.banner.update({
       where: { id },
       data: dto,
     });
+    this.activeCache.clear();
+    return row;
   }
 
   async delete(id: string) {
@@ -65,6 +76,7 @@ export class BannersService {
     await this.prisma.banner.delete({
       where: { id },
     });
+    this.activeCache.clear();
 
     return { message: 'Banner deleted successfully' };
   }

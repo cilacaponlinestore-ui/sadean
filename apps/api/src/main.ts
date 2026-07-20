@@ -9,12 +9,15 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { PrismaClient } from '@prisma/client';
 
 async function seedSuperAdmin() {
+  const email = process.env.SUPER_ADMIN_EMAIL?.trim().toLowerCase();
+  if (!email) return;
+
   const prisma = new PrismaClient();
   try {
-    const sa = await prisma.user.findUnique({ where: { email: 'daniadhisaputro@gmail.com' } });
+    const sa = await prisma.user.findUnique({ where: { email } });
     if (sa && sa.role !== 'super_admin') {
-      await prisma.user.update({ where: { email: 'daniadhisaputro@gmail.com' }, data: { role: 'super_admin' } });
-      console.log('Seeded super_admin: daniadhisaputro@gmail.com');
+      await prisma.user.update({ where: { email }, data: { role: 'super_admin' } });
+      console.log(`Seeded super_admin: ${email}`);
     }
   } catch (e) {
     console.warn('super_admin seed skipped:', (e as Error).message);
@@ -53,22 +56,28 @@ async function bootstrap() {
   );
   app.useGlobalFilters(new AllExceptionsFilter());
 
-  // Swagger
-  const config = new DocumentBuilder()
-    .setTitle('SADEAN API')
-    .setDescription('API untuk SADEAN - Platform Digital UMKM Cilacap')
-    .setVersion('1.0')
-    .addBearerAuth()
-    .build();
+  const swaggerEnabled =
+    process.env.SWAGGER_ENABLED === 'true' || process.env.NODE_ENV !== 'production';
 
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document);
+  if (swaggerEnabled) {
+    const config = new DocumentBuilder()
+      .setTitle('SADEAN API')
+      .setDescription('API untuk SADEAN - Platform Digital UMKM Cilacap')
+      .setVersion('1.0')
+      .addBearerAuth()
+      .build();
+
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api/docs', app, document);
+  }
 
   const port = configService.get<number>('PORT') || 3001;
   await app.listen(port, '0.0.0.0');
-  
-  console.log(`🚀 Application is running on: http://localhost:${port}`);
-  console.log(`📚 Swagger docs: http://localhost:${port}/api/docs`);
+
+  console.log(`Application is running on: http://localhost:${port}`);
+  if (swaggerEnabled) {
+    console.log(`Swagger docs: http://localhost:${port}/api/docs`);
+  }
 
   seedSuperAdmin();
 }

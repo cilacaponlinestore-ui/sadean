@@ -1,10 +1,13 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { MemoryCache } from '../../common/cache/memory-cache';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 
 @Injectable()
 export class CategoriesService {
+  private listCache = new MemoryCache<any[]>(300_000);
+
   constructor(private prisma: PrismaService) {}
 
   async create(dto: CreateCategoryDto) {
@@ -24,15 +27,19 @@ export class CategoriesService {
       throw new ConflictException('Category name already exists');
     }
 
-    return this.prisma.category.create({
+    const row = await this.prisma.category.create({
       data: {
         ...dto,
         slug,
       },
     });
+    this.listCache.clear();
+    return row;
   }
 
   async findAll() {
+    const hit = this.listCache.get('roots');
+    if (hit) return hit;
     const categories = await this.prisma.category.findMany({
       where: { isActive: true },
       include: {
@@ -45,7 +52,9 @@ export class CategoriesService {
     });
 
     // Return only root categories with children
-    return categories.filter((cat) => !cat.parentId);
+    const roots = categories.filter((cat) => !cat.parentId);
+    this.listCache.set('roots', roots);
+    return roots;
   }
 
   async findById(id: string) {
@@ -113,13 +122,15 @@ export class CategoriesService {
       }
     }
 
-    return this.prisma.category.update({
+    const row = await this.prisma.category.update({
       where: { id },
       data: {
         ...dto,
         slug,
       },
     });
+    this.listCache.clear();
+    return row;
   }
 
   async delete(id: string) {
@@ -146,6 +157,7 @@ export class CategoriesService {
     await this.prisma.category.delete({
       where: { id },
     });
+    this.listCache.clear();
 
     return { message: 'Category deleted successfully' };
   }
